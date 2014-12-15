@@ -33,6 +33,12 @@ body, html {
   height: 69%;
   background-color: #d8d8d8;
   position: relative;
+
+  .block {
+    .mode-block {
+      pointer-events: none;
+    }
+  }
 }
 
 #blockbrowser {

@@ -4,6 +4,7 @@
 require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', 'bootstrap'], function (data, d3, events, selectionInfo, blocks) {
   'use strict';
   selectionInfo.create(document.getElementById('selectioninfo'));
+  selectionInfo.createFor(blocks.manager, document.getElementById('selectioninfo'));
   var content = document.getElementById('board');
   var b = [];
 
