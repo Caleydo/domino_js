@@ -17,13 +17,27 @@
     <script data-main="/config-gen.js" src="/bower_components/requirejs/require.js"></script>
   </head>
 	<body>
-    <aside id="selectioninfo">
+    <aside id="sidebar">
       <h1>Domino</h1>
       <div id="toolbar"></div>
+      <div id="selectioninfo"></div>
     </aside>
     <div id="content">
       <div id="board"></div>
-      <footer id="blockbrowser"></footer>
+      <footer id="blockbrowser">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Type</th>
+              <th>Dim</th>
+            </tr>
+          </thead>
+          <tbody>
+
+          </tbody>
+        </table>
+      </footer>
     </div>
 	</body>
 </html>

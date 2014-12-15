@@ -9,11 +9,17 @@ body, html {
   height: 100%;
 }
 
-#selectioninfo {
+#sidebar {
   display: inline-block;
   width: 15%;
   height: 100%;
   vertical-align: top;
+
+  .selectioninfo {
+    .no-selection {
+      display: none;
+    }
+  }
 }
 
 #content {
@@ -26,10 +32,83 @@ body, html {
   width: 100%;
   height: 69%;
   background-color: #d8d8d8;
+  position: relative;
 }
 
 #blockbrowser {
   width: 100%;
   height: 30%;
   background-color: #828282;
+
+  table {
+    width: 100%;
+    height: 100%;
+
+    tr:hover {
+      background-color: #d9d9d9
+    }
+
+    tbody {
+      height: 90%;
+      overflow: auto;
+    }
+  }
+}
+
+.window.ui-widget-content {
+  position: absolute;
+  background-color: transparent !important;
+
+  border: none;
+
+  > .ui-widget-header {
+    position: relative;
+    font-size: 12px;
+
+    white-space: nowrap;
+
+    h3 {
+      display: inline-block;
+      margin: 0;
+      cursor: pointer;
+      text-align: center;
+    }
+    .toolbar {
+      display: inline-block;
+      top: 0;
+      margin-top: auto;
+      margin-bottom: auto;
+
+      i {
+        background-size: 100%;
+        margin: 0 0.1em;
+      }
+      i:hover {
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      div {
+        display: inline-block;
+        margin: 0 .2em;
+      }
+    }
+  }
+
+  > div.content {
+    margin: 0 auto 0 0;
+    border: 1px solid #eeeeee;
+  }
+}
+
+.select-selected {
+  //svg variant
+  stroke: orange !important;
+  stroke-width: 1px;
+  fill: orange !important;
+  vector-effect : non-scaling-stroke;
+
+  //html variant
+  border: 1px solid orange !important;
+  background-color: orange !important;
 }
