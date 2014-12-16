@@ -28,6 +28,17 @@ h1 {
       display: none;
     }
   }
+
+  #toolbar {
+    i {
+      background-size: 100%;
+      margin: 0 0.1em;
+    }
+
+    .btn-group {
+      //display: block;
+    }
+  }
 }
 
 #content {
@@ -49,6 +60,10 @@ h1 {
 
     &.select-selected {
       border: 1px solid orange;
+      background: none;
+    }
+    &.select-hovered {
+      border: 1px solid #ffc46b;
       background: none;
     }
 

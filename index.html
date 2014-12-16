@@ -26,8 +26,16 @@
           <button type="button" class="btn btn-default" title="Redo"><i class="fa fa-repeat"></i></button>
           <button type="button" class="btn btn-default" title="Play"><i class="fa fa-video-camera"></i></button>
         </div>
-        <div class="btn-group" id="block">
-
+        <div class="btn-group" id="mode-toolbar">
+          <button type="button" class="btn btn-default active" id="mode-normal" title="Normal"><i class="fa fa-arrows"></i></button>
+          <button type="button" class="btn btn-default" id="mode-select" title="Select"><i class="fa fa-th"></i></button>
+        </div>
+        <div class="btn-group" id="block-toolbar">
+          <div class="btn-group" id="block-general-toolbar">
+            <button type="button" class="btn btn-default" id="block-remove" title="Remove" disabled="disabled"><i class="fa fa-remove"></i></button>
+          </div>
+          <div class="btn-group" id="block-vis-toolbar">
+          </div>
         </div>
       </div>
       <div id="selectioninfo"></div>

@@ -23,13 +23,12 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
     return mode;
   };
 
-  manager.on('select-selected', function () {
+  manager.on('select', function (event, type) {
     manager.forEach(function (block) {
-      block.$node.removeClass('select-selected');
+      block.$node.removeClass('select-' + type);
     });
-    var r = manager.selectedObjects();
-    manager.selectedObjects().forEach(function (block) {
-      block.$node.addClass('select-selected');
+    manager.selectedObjects(type).forEach(function (block) {
+      block.$node.addClass('select-' + type);
     });
   });
 
@@ -102,8 +101,9 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
       this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
         return data.view(range);
       });
+      this.visMeta = multiform.asMetaData;
       this.zoom.v = this.vis;
-      this.zoom.meta = this.vis.asMetaData;
+      this.zoom.meta = this.visMeta;
       this.fire('change.range', value, bak);
     }
   });
@@ -125,8 +125,8 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
   Block.prototype.destroy = function () {
     if (this.vis) {
       this.vis.destroy();
-      this.$content.clear();
     }
+    this.$node.remove();
     manager.remove(this);
   };
   Object.defineProperty(Block.prototype, 'pos', {
