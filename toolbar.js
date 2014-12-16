@@ -38,7 +38,7 @@ define(['exports', 'd3', '../caleydo/multiform', './block'], function (exports, 
     $visses.classed('active', function (d) { return d === active; });
 
     //enable remove button
-    d3.select('#block-remove').attr('disabled', blocks.length > 0 ? null : 'disabled');
+    d3.select('#block-toolbar').style('visibility', blocks.length > 0 ? null : 'hidden');
   }
   function selectionListener() {
     rebuildBlockToolBar(manager.selectedObjects());
@@ -52,6 +52,18 @@ define(['exports', 'd3', '../caleydo/multiform', './block'], function (exports, 
     rebuildBlockToolBar([]);
     manager.on('select-selected', selectionListener);
   });
-
   manager.on('select-selected', selectionListener);
+
+  (function () {
+    var $buttons = d3.selectAll('#mode-toolbar button');
+    $buttons.on('click', function () {
+      var $this = d3.select(this);
+      var m = $this.attr('data-mode');
+      d3.select('#board').attr('class', 'mode-' + m);
+      blocks.switchMode(m);
+      $buttons.classed('active', function (d) {
+        return d3.select(this).attr('data-mode') === blocks.mode();
+      });
+    });
+  })();
 });

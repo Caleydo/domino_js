@@ -40,8 +40,8 @@ require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/
     var $base = d3.select('#blockbrowser table tbody');
     var $rows = $base.selectAll('tr').data(items);
     $rows.enter().append('tr').html(function (d) {
-      return '<th>' + d.desc.name + '</th><td>' + toType(d.desc) + '</td><td>' + d.dim.join(' x ') + '</td>';
-    }).on('click', function (dataset) {
+      return '<td><button class="btn btn-link"><i class="fa fa-plus-circle"></i></button></td><th>' + d.desc.name + '</th><td>' + toType(d.desc) + '</td><td>' + d.dim.join(' x ') + '</td>';
+    }).select('button').on('click', function (dataset) {
       b.push(blocks.create(dataset, content));
     });
   });
