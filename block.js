@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype'], function (exports, $, C, ranges, events, multiform, idtypes) {
+define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', 'jquery-ui'], function (exports, $, C, ranges, events, multiform, idtypes) {
   "use strict";
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
@@ -25,7 +25,7 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
 
   function Block(data, parent) {
     events.EventHandler.call(this);
-    var id = this.id = manager.nextId();
+    var id = this.id = manager.nextId(this);
     this.data = data;
     this.parent = parent;
     this.$node = $('<div>').appendTo(parent).addClass('block');
@@ -51,6 +51,26 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
         }
       }
     });
+    this.$node.draggable({
+      appendTo: parent,
+      containment: 'parent',
+      cursor: 'pointer',
+      delay: 150,
+      grid: [5, 5],
+      helper: function () {
+        var s = that.size;
+        return $('<div class="block_dragger">').css({
+          width: s[0],
+          height: s[1]
+        });
+      },
+      snap: true,
+      snapMode: 'outer',
+      stop: function (event, ui) {
+        that.pos = [ui.position.left, ui.position.top];
+      }
+    });
+    this.switchMode(mode);
   }
   C.extendClass(Block, events.EventHandler);
 
@@ -72,9 +92,11 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
     switch (m) {
     case 'block':
       this.$content.addClass('mode-block');
+      this.$node.draggable('enable');
       break;
     case 'select':
       this.$content.removeClass('mode-block');
+      this.$node.draggable('disable');
       break;
     }
   };
@@ -86,6 +108,7 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
       this.vis.destroy();
       this.$content.clear();
     }
+    manager.remove(this);
   };
   Object.defineProperty(Block.prototype, 'pos', {
     get : function () {
@@ -109,6 +132,16 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
     }
     return this.moveBy(toDelta(xfactor), toDelta(yfactor));
   };
+  Object.defineProperty(Block.prototype, 'size', {
+    get: function () {
+      return [this.$node.width(), this.$node.height()];
+    },
+    set: function (val) {
+      this.$node.css('width', val[0]);
+      this.$node.css('height', val[1]);
+    },
+    enumerable: true
+  });
 
   function LinearBlock() {
     this.blocks = [];
