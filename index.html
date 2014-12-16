@@ -19,13 +19,24 @@
 	<body>
     <aside id="sidebar">
       <h1>Domino</h1>
-      <div id="toolbar"></div>
+      <div id="toolbar">
+        <div class="btn-group">
+          <button type="button" class="btn btn-default" title="Undo"><i class="fa fa-undo"></i></button>
+          <button type="button" class="btn btn-default" title="Clear Undo"><span class="fa-stack"><i class="fa fa-undo fa-stack-1x"></i><i class="fa fa-remove fa-stack-1x text-danger"></i></span></button>
+          <button type="button" class="btn btn-default" title="Redo"><i class="fa fa-repeat"></i></button>
+          <button type="button" class="btn btn-default" title="Play"><i class="fa fa-video-camera"></i></button>
+        </div>
+        <div class="btn-group" id="block">
+
+        </div>
+      </div>
       <div id="selectioninfo"></div>
     </aside>
     <div id="content">
-      <div id="board"></div>
+      <main id="board">
+      </main>
       <footer id="blockbrowser">
-        <table>
+        <table class="table table-striped table-hover table-condensed">
           <thead>
             <tr>
               <th>Name</th>

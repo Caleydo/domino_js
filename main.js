@@ -1,12 +1,17 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', 'bootstrap'], function (data, d3, events, selectionInfo, blocks) {
+require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', 'bootstrap', 'font-awesome'], function (data, d3, events, selectionInfo, blocks, idtypes) {
   'use strict';
   selectionInfo.create(document.getElementById('selectioninfo'));
   selectionInfo.createFor(blocks.manager, document.getElementById('selectioninfo'));
   var content = document.getElementById('board');
   var b = [];
+
+  d3.select(content).append('div').classed('selection-clearer', true).on('click', function () {
+    blocks.manager.clear();
+    idtypes.clearSelection();
+  });
 
   function splitTables(items) {
     var r = [];

@@ -9,6 +9,14 @@ body, html {
   height: 100%;
 }
 
+h1 {
+  background-image: url(assets/icons/icon.svg);
+  background-position: left center;
+  background-size: contain;
+  background-repeat: no-repeat;
+  padding-left: 1.1em;
+}
+
 #sidebar {
   display: inline-block;
   width: 15%;
@@ -39,6 +47,11 @@ body, html {
     width: auto;
     height: auto;
 
+    &.select-selected {
+      border: 1px solid orange;
+      background: none;
+    }
+
     .mode-block {
       pointer-events: none;
     }
@@ -49,20 +62,22 @@ body, html {
     opacity: 0.8;
     position: absolute;
   }
+
+  .selection-clearer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
 }
 
 #blockbrowser {
   width: 100%;
   height: 30%;
-  background-color: #828282;
   display: block;
   overflow: auto;
 
   table {
     width: 90%;
-    tr:hover {
-      background-color: #d9d9d9
-    }
 
     /*tbody {
       width: 100%;
@@ -120,13 +135,15 @@ body, html {
 }
 
 .select-selected {
-  //svg variant
-  stroke: orange !important;
-  stroke-width: 1px;
-  fill: orange !important;
-  vector-effect : non-scaling-stroke;
-
   //html variant
-  border: 1px solid orange !important;
-  background-color: orange !important;
+  border: 1px solid orange;
+  background-color: orange;
+}
+
+svg .select-selected {
+  //svg variant
+  stroke: orange;
+  stroke-width: 1px;
+  fill: orange;
+  vector-effect: non-scaling-stroke;
 }

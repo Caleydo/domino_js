@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', 'jquery-ui'], function (exports, $, C, ranges, events, multiform, idtypes) {
+define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', 'jquery-ui'], function (exports, $, C, ranges, events, multiform, idtypes, behaviors) {
   "use strict";
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
@@ -23,12 +23,24 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
     return mode;
   };
 
+  manager.on('select-selected', function () {
+    manager.forEach(function (block) {
+      block.$node.removeClass('select-selected');
+    });
+    var r = manager.selectedObjects();
+    manager.selectedObjects().forEach(function (block) {
+      block.$node.addClass('select-selected');
+    });
+  });
+
   function Block(data, parent) {
     events.EventHandler.call(this);
     var id = this.id = manager.nextId(this);
     this.data = data;
     this.parent = parent;
     this.$node = $('<div>').appendTo(parent).addClass('block');
+    this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
+    this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);
     var that = this;
     if (data.desc.type === 'vector') {
@@ -47,8 +59,10 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
       },
       click : function (event) {
         if (mode !== 'select') {
+          console.log('select', id);
           manager.select([id], idtypes.toSelectOperation(event));
         }
+        return false;
       }
     });
     this.$node.draggable({
@@ -81,10 +95,15 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
     set : function (value) {
       var bak = this.range_;
       this.range_ = value || ranges.all();
-      this.destroy();
+      if (this.vis) {
+        this.vis.destroy();
+        this.$content.clear();
+      }
       this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
         return data.view(range);
       });
+      this.zoom.v = this.vis;
+      this.zoom.meta = this.vis.asMetaData;
       this.fire('change.range', value, bak);
     }
   });
