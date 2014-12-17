@@ -1,19 +1,15 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, events, selectionInfo, blocks, idtypes) {
+require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', './links', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, events, selectionInfo, blocks, idtypes, links) {
   'use strict';
   selectionInfo.create(document.getElementById('selectioninfo'));
-  selectionInfo.createFor(blocks.manager, document.getElementById('selectioninfo'));
   var content = document.getElementById('board');
-  var b = [];
 
-  d3.select(content).append('div').classed('selection-clearer', true).on('click', function () {
+  links.createLayer(content).classed('selection-clearer', true).on('click', function () {
     blocks.manager.clear();
     idtypes.clearSelection();
   });
-
-
 
   function splitTables(items) {
     var r = [];
@@ -42,7 +38,7 @@ require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/
     $rows.enter().append('tr').html(function (d) {
       return '<td><button class="btn btn-link"><i class="fa fa-plus-circle"></i></button></td><th>' + d.desc.name + '</th><td>' + toType(d.desc) + '</td><td>' + d.dim.join(' x ') + '</td>';
     }).select('button').on('click', function (dataset) {
-      b.push(blocks.create(dataset, content));
+      blocks.create(dataset, content);
     });
   });
 });

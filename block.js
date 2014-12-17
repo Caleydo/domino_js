@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', 'jquery-ui'], function (exports, $, C, ranges, events, multiform, idtypes, behaviors) {
+define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', 'jquery-ui'], function (exports, $, d3, C, ranges, events, multiform, idtypes, behaviors) {
   "use strict";
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
@@ -83,30 +83,12 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
         that.pos = [ui.position.left, ui.position.top];
       }
     });
+    this.actSorting = [];
     this.switchMode(mode);
   }
   C.extendClass(Block, events.EventHandler);
 
-  Object.defineProperty(Block.prototype, 'range', {
-    get : function () {
-      return this.range_;
-    },
-    set : function (value) {
-      var bak = this.range_;
-      this.range_ = value || ranges.all();
-      if (this.vis) {
-        this.vis.destroy();
-        this.$content.clear();
-      }
-      this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
-        return data.view(range);
-      });
-      this.visMeta = multiform.asMetaData;
-      this.zoom.v = this.vis;
-      this.zoom.meta = this.visMeta;
-      this.fire('change.range', value, bak);
-    }
-  });
+
   Block.prototype.switchMode = function (m) {
     switch (m) {
     case 'block':
@@ -119,8 +101,99 @@ define(['exports', 'jquery', '../caleydo/main', '../caleydo/range', '../caleydo/
       break;
     }
   };
+  Object.defineProperty(Block.prototype, 'range', {
+    get : function () {
+      return this.range_;
+    },
+    set : function (value) {
+      var bak = this.range_;
+      this.range_ = value || ranges.all();
+      var initialVis = -1;
+      if (this.vis) {
+        initialVis = this.vis.actDesc;
+        this.vis.destroy();
+        this.$content.empty();
+      }
+      this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
+        return data.view(range);
+      }, {
+        initialVis : initialVis
+      });
+      this.visMeta = multiform.asMetaData;
+      this.zoom.v = this.vis;
+      this.zoom.meta = this.visMeta;
+      this.fire('change.range', value, bak);
+    }
+  });
+  Object.defineProperty(Block.prototype, 'ndim', {
+    get : function () {
+      return this.range_.ndim;
+    }
+  });
   Block.prototype.dim = function (dim) {
     return this.range_.dim(dim);
+  };
+
+  function toCompareFunc(desc, cmp) {
+    cmp = (cmp === 'asc') ? d3.ascending : (cmp === 'desc' ? d3.descending : cmp);
+
+    switch (desc.value.type) {
+    case 'categorical':
+      var cats = desc.value.categories;
+      return function (a, b, data) {
+        var ac = data[a];
+        var bc = data[b];
+        var ai = cats.indexOf(ac);
+        var bi = cats.indexOf(bc);
+        return cmp(ai, bi);
+      };
+    default:
+      return function (a, b, data) {
+        var ac = data[a];
+        var bc = data[b];
+        return cmp(ac, bc);
+      };
+    }
+  }
+
+  Block.prototype.sort = function (dim, cmp) {
+    if (dim > this.ndim) {
+      return C.resolved(null);
+    }
+    var r = this.range.dims;
+    var active = r[dim];
+    var that = this;
+
+    //special 'next' sorting mode
+    if (cmp === 'next') {
+      var old = this.actSorting[dim];
+      if (old === 'asc') {
+        cmp = 'desc';
+      } else {
+        cmp = 'asc';
+      }
+    }
+    this.actSorting[dim] = cmp;
+
+    cmp = toCompareFunc(this.data.desc, cmp);
+
+    //get data and sort the range and update the range
+    return this.data.data().then(function (data_) {
+      r[dim] = active.sort(function (a, b) { return cmp(a, b, data_);  });
+      console.log(active.toString(), ' -> ', r[dim].toString());
+      that.range = ranges.list(r);
+      return that.range;
+    });
+  };
+
+  Object.defineProperty(Block.prototype, 'idtypes', {
+    get : function () {
+      return this.data.idtypes;
+    },
+    enumerable: true
+  });
+  Block.prototype.ids = function (range) {
+    return this.data.ids(range);
   };
   Block.prototype.destroy = function () {
     if (this.vis) {

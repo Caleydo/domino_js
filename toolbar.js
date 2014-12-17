@@ -37,6 +37,12 @@ define(['exports', 'd3', '../caleydo/multiform', './block'], function (exports, 
     }
     $visses.classed('active', function (d) { return d === active; });
 
+    if (blocks.length === 1) {
+
+    } else {
+
+    }
+
     //enable remove button
     d3.select('#block-toolbar').style('visibility', blocks.length > 0 ? null : 'hidden');
   }
@@ -53,6 +59,14 @@ define(['exports', 'd3', '../caleydo/multiform', './block'], function (exports, 
     manager.on('select-selected', selectionListener);
   });
   manager.on('select-selected', selectionListener);
+
+  d3.select('#block-sort').on('click', function () {
+    manager.selectedObjects().forEach(function (b) {
+      b.sort(0, 'next');
+    });
+  });
+  manager.on('select-selected', selectionListener);
+
 
   (function () {
     var $buttons = d3.selectAll('#mode-toolbar button');
