@@ -42,6 +42,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);
     var that = this;
+    this.rangeUnsorted = undefined;
     if (data.desc.type === 'vector') {
       data.groups().then(function (groups) {
         that.range = ranges.list(groups);
@@ -101,28 +102,33 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       break;
     }
   };
+  Block.prototype.setRangeImpl = function (value) {
+    var bak = this.range_;
+    this.range_ = value || ranges.all();
+    var initialVis = -1;
+    if (this.vis) {
+      initialVis = this.vis.actDesc;
+      this.vis.destroy();
+      this.$content.empty();
+    }
+    this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
+      return data.view(range);
+    }, {
+      initialVis : initialVis
+    });
+    this.visMeta = multiform.asMetaData;
+    this.zoom.v = this.vis;
+    this.zoom.meta = this.visMeta;
+    this.fire('change.range', value, bak);
+  };
   Object.defineProperty(Block.prototype, 'range', {
     get : function () {
       return this.range_;
     },
     set : function (value) {
-      var bak = this.range_;
-      this.range_ = value || ranges.all();
-      var initialVis = -1;
-      if (this.vis) {
-        initialVis = this.vis.actDesc;
-        this.vis.destroy();
-        this.$content.empty();
-      }
-      this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
-        return data.view(range);
-      }, {
-        initialVis : initialVis
-      });
-      this.visMeta = multiform.asMetaData;
-      this.zoom.v = this.vis;
-      this.zoom.meta = this.visMeta;
-      this.fire('change.range', value, bak);
+      value = value || ranges.all();
+      this.rangeUnsorted = value;
+      this.setRangeImpl(value);
     }
   });
   Object.defineProperty(Block.prototype, 'ndim', {
@@ -160,7 +166,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     if (dim > this.ndim) {
       return C.resolved(null);
     }
-    var r = this.range.dims;
+    var r = this.range.dims.slice(); //work on copy
     var active = r[dim];
     var that = this;
 
@@ -169,19 +175,31 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       var old = this.actSorting[dim];
       if (old === 'asc') {
         cmp = 'desc';
-      } else {
+      } else if (old === 'desc') {
+        cmp = 'none';
+      } else { //restore original sorting
         cmp = 'asc';
       }
     }
+
+    if (cmp === 'none') {
+      this.actSorting[dim] = undefined;
+      r[dim] = this.rangeUnsorted.dim(dim);
+      console.log(active.toString(), ' -> ', r[dim].toString());
+      this.setRangeImpl(ranges.list(r));
+      return C.resolved(this.range);
+    }
+
     this.actSorting[dim] = cmp;
 
     cmp = toCompareFunc(this.data.desc, cmp);
 
     //get data and sort the range and update the range
+    //TODO just the needed data
     return this.data.data().then(function (data_) {
       r[dim] = active.sort(function (a, b) { return cmp(a, b, data_);  });
       console.log(active.toString(), ' -> ', r[dim].toString());
-      that.range = ranges.list(r);
+      that.setRangeImpl(ranges.list(r));
       return that.range;
     });
   };
