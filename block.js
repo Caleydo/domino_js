@@ -102,10 +102,24 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       break;
     }
   };
+
+  function guessInitial(desc) {
+    if (desc.type === 'matrix') {
+      return 'caleydo-vis-heatmap';
+    }
+    if (desc.type === 'vector' && desc.value.type === 'categorical') {
+      return 'caleydo-vis-mosaic';
+    }
+    if (desc.type === 'vector' && desc.value.type.match('real|int')) {
+      return 'caleydo-vis-axis';
+    }
+    return -1;
+  }
+
   Block.prototype.setRangeImpl = function (value) {
     var bak = this.range_;
     this.range_ = value || ranges.all();
-    var initialVis = -1;
+    var initialVis = guessInitial(this.data.desc);
     if (this.vis) {
       initialVis = this.vis.actDesc;
       this.vis.destroy();
@@ -116,7 +130,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     }, {
       initialVis : initialVis
     });
-    this.visMeta = multiform.asMetaData;
+    this.visMeta = this.vis.asMetaData;
     this.zoom.v = this.vis;
     this.zoom.meta = this.visMeta;
     this.fire('change.range', value, bak);
