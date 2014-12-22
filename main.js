@@ -1,12 +1,19 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', './links', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, events, selectionInfo, blocks, idtypes, links) {
+require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', '../caleydo-links/link', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, events, selectionInfo, blocks, idtypes, links) {
   'use strict';
   selectionInfo.create(document.getElementById('selectioninfo'));
   var content = document.getElementById('board');
 
-  links.createLayer(content).classed('selection-clearer', true).on('click', function () {
+  var c = new links.LinkContainer(content, ['change', 'transform', 'change.pos', 'change.range', 'zoom']);
+  blocks.manager.on('add', function (event, id, block) {
+    c.push(block);
+  });
+  blocks.manager.on('remove', function (event, id, block) {
+    c.remove(block);
+  });
+  d3.select(c.node).classed('selection-clearer', true).on('click', function () {
     blocks.manager.clear();
     idtypes.clearSelection();
   });

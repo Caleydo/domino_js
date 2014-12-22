@@ -52,6 +52,11 @@ $hover-color: #ffc46b;
   height: 100%;
 }
 
+svg {
+  vector-effect : non-scaling-stroke;
+  shape-rendering: geometricPrecision;
+}
+
 #board {
   width: 100%;
   height: 69%;
@@ -101,6 +106,25 @@ $hover-color: #ffc46b;
     width: 100%;
     height: 100%;
     position: absolute;
+  }
+
+  .link-container {
+    svg {
+      position: absolute;
+
+      path.rel-item {
+        stroke: black;
+        stroke-width: 1;
+        stroke-opacity: 0.9;
+      }
+      path.rel-block {
+        stroke: black;
+        stroke-width: 1;
+        stroke-opacity: 0.9;
+        fill: black;
+        opacity: 0.2;
+      }
+    }
   }
 }
 

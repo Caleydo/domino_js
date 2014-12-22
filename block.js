@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', 'jquery-ui'], function (exports, $, d3, C, ranges, events, multiform, idtypes, behaviors) {
+define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', '../caleydo/geom', 'jquery-ui'], function (exports, $, d3, C, ranges, events, multiform, idtypes, behaviors, geom) {
   "use strict";
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
@@ -34,7 +34,6 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
 
   function Block(data, parent) {
     events.EventHandler.call(this);
-    var id = this.id = manager.nextId(this);
     this.data = data;
     this.parent = parent;
     this.$node = $('<div>').appendTo(parent).addClass('block');
@@ -52,15 +51,15 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     }
     this.$node.on({
       mouseenter : function () {
-        manager.select(idtypes.hoverSelectionType, [id], idtypes.SelectOperation.ADD);
+        manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.ADD);
       },
       mouseleave : function () {
-        manager.select(idtypes.hoverSelectionType, [id], idtypes.SelectOperation.REMOVE);
+        manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.REMOVE);
       },
       click : function (event) {
         if (mode !== 'select') {
-          console.log('select', id);
-          manager.select([id], idtypes.toSelectOperation(event));
+          console.log('select', that.id);
+          manager.select([that.id], idtypes.toSelectOperation(event));
         }
         return false;
       }
@@ -86,6 +85,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     });
     this.actSorting = [];
     this.switchMode(mode);
+    this.id = manager.nextId(this);
   }
   C.extendClass(Block, events.EventHandler);
 
@@ -152,6 +152,31 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
   });
   Block.prototype.dim = function (dim) {
     return this.range_.dim(dim);
+  };
+
+  Object.defineProperty(Block.prototype, 'location', {
+    get : function () {
+      var p = this.pos;
+      var s = this.size;
+      return geom.rect(p[0], p[1], s[0], s[1]);
+    }
+  });
+
+  Block.prototype.locate = function () {
+    var vis = this.vis, that = this;
+    if (!vis || !C.isFunction(vis.locate)) {
+      return C.resolved((arguments.length === 1 ? undefined : new Array(arguments.length)));
+    }
+    return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
+      var p = that.pos;
+      if (C.isArray(r)) {
+        return r.map(function (loc) {
+          return loc ? geom.wrap(loc).shift(p) : loc;
+        })
+      } else {
+        return r ? geom.wrap(r).shift(p) : r;
+      }
+    });
   };
 
   function toCompareFunc(desc, cmp) {
