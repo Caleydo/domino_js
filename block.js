@@ -172,7 +172,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       if (C.isArray(r)) {
         return r.map(function (loc) {
           return loc ? geom.wrap(loc).shift(p) : loc;
-        })
+        });
       } else {
         return r ? geom.wrap(r).shift(p) : r;
       }
