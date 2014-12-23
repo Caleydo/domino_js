@@ -112,18 +112,40 @@ svg {
     svg {
       position: absolute;
 
+      path.rel-back {
+        stroke: none;
+        fill: white;
+        opacity: 0;
+      }
       path.rel-item {
+        pointer-events: none;
         stroke: black;
         stroke-width: 1;
         stroke-opacity: 0.9;
+
+        &.select-selected {
+          stroke: $select-color;
+        }
+        &.select-hovered {
+          stroke: $hover-color;
+        }
       }
-      path.rel-block {
+      path.rel-group, path.rel-block {
+        pointer-events: none;
         stroke: black;
         stroke-width: 1;
         stroke-opacity: 0.9;
         fill: black;
         opacity: 0.2;
+
+        &.select-selected {
+          fill: $select-color;
+        }
+        &.select-hovered {
+          fill: $hover-color;
+        }
       }
+
     }
   }
 }
