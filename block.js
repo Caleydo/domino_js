@@ -125,9 +125,12 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       this.vis.destroy();
       this.$content.empty();
     }
-    this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
+    /*this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
       return data.view(range);
     }, {
+      initialVis : initialVis
+    });*/
+    this.vis = multiform.create(this.data.view(this.range_), this.$content[0], {
       initialVis : initialVis
     });
     this.visMeta = this.vis.asMetaData;
@@ -154,6 +157,10 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     return this.range_.dim(dim);
   };
 
+  Block.prototype.ids = function () {
+    return this.data.ids(this.range);
+  };
+
   Object.defineProperty(Block.prototype, 'location', {
     get : function () {
       var p = this.pos;
@@ -168,6 +175,23 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       return C.resolved((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
     return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
+      var p = that.pos;
+      if (C.isArray(r)) {
+        return r.map(function (loc) {
+          return loc ? geom.wrap(loc).shift(p) : loc;
+        });
+      } else {
+        return r ? geom.wrap(r).shift(p) : r;
+      }
+    });
+  };
+
+  Block.prototype.locateById = function () {
+    var vis = this.vis, that = this;
+    if (!vis || !C.isFunction(vis.locateById)) {
+      return C.resolved((arguments.length === 1 ? undefined : new Array(arguments.length)));
+    }
+    return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
       var p = that.pos;
       if (C.isArray(r)) {
         return r.map(function (loc) {
@@ -249,8 +273,8 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     },
     enumerable: true
   });
-  Block.prototype.ids = function (range) {
-    return this.data.ids(range);
+  Block.prototype.ids = function () {
+    return this.data.ids(this.range);
   };
   Block.prototype.destroy = function () {
     if (this.vis) {
