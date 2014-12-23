@@ -43,7 +43,8 @@ require(['../caleydo/data', 'd3', '../caleydo/event', '../caleydo-selectioninfo/
     var $base = d3.select('#blockbrowser table tbody');
     var $rows = $base.selectAll('tr').data(items);
     $rows.enter().append('tr').html(function (d) {
-      return '<td><button class="btn btn-link"><i class="fa fa-plus-circle"></i></button></td><th>' + d.desc.name + '</th><td>' + toType(d.desc) + '</td><td>' + d.dim.join(' x ') + '</td>';
+      return '<td><button class="btn btn-link"><i class="fa fa-plus-circle"></i></button></td><th>' + d.desc.name + '</th><td>' + toType(d.desc) + '</td><td>' +
+        d.idtypes.map(function (d) { return d.name; }).join(', ') + '</td><td>' + d.dim.join(' x ') + '</td>';
     }).select('button').on('click', function (dataset) {
       blocks.create(dataset, content);
     });
