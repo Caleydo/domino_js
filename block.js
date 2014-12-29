@@ -73,13 +73,16 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     });
     this.$node.attr('draggable', true)
       .on('dragstart', function (event) {
-        var d = this.__data__;
         var e = event.originalEvent;
         e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
-        e.dataTransfer.setData('text/plain', d.desc.name);
-        e.dataTransfer.setData('application/json', JSON.stringify(d.desc));
-        e.dataTransfer.setData('application/caleydo-domino-block', that);
-        e.dataTransfer.setData('application/caleydo-data-item', d);
+        e.dataTransfer.setData('text/plain', data.desc.name);
+        e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
+        e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
+          block: that.id,
+          offsetX : e.offsetX,
+          offsetY : e.offsetY
+        }));
+        e.dataTransfer.setData('application/caleydo-data-item', data);
       });
 
     /*this.$node.draggable({
@@ -367,13 +370,13 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     var that = this;
     this.$node.on('dragenter', function () {
       var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-block')) {
+      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
         that.addPlaceholders();
         return false;
       }
     }).on('dragover', function () {
       var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-block')) {
+      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
         e.preventDefault();
         return false;
       }
@@ -382,9 +385,10 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     }).on('drop', function () {
       var e = d3.event;
       e.preventDefault();
-      if (hasDnDType(e, 'application/caleydo-domino-block')) {
-        var block = manager.byId(+e.dataTransfer.getData('application/caleydo-block'));
-        block.pos = [e.offsetX, e.offsetY];
+      if (hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+        var info = JSON.parse(e.dataTransfer.getData('application/caleydo-domino-dndinfo'));
+        var block = manager.byId(+info.block);
+        block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];
         return false;
       }
       if (hasDnDType(e, 'application/caleydo-data-item')) {
