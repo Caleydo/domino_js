@@ -1,19 +1,10 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-require(['../caleydo/data', 'd3', 'jquery', '../caleydo/event', '../caleydo-selectioninfo/main', './block', '../caleydo/idtype', '../caleydo-links/link', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, $, events, selectionInfo, blocks, idtypes, links) {
+require(['../caleydo/data', 'd3', 'jquery', '../caleydo/event', '../caleydo-selectioninfo/main', './board', '../caleydo/idtype', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, $, events, selectionInfo, boards, idtypes, links) {
   'use strict';
-  selectionInfo.create(document.getElementById('selectioninfo'));
-  var content = document.getElementById('board');
-
-  var c = new links.LinkContainer(content, ['change', 'transform', 'change.pos', 'change.range', 'zoom']);
-  blocks.manager.on('add', function (event, id, block) {
-    c.push(block);
-  });
-  blocks.manager.on('remove', function (event, id, block) {
-    c.remove(block);
-  });
-  blocks.createBoard(c.node);
+  var info = selectionInfo.create(document.getElementById('selectioninfo'));
+  var board = boards.create(document.getElementById('board'));
 
   function splitTables(items) {
     var r = [];

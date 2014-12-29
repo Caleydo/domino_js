@@ -37,6 +37,9 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
       block.$node.addClass('select-' + type);
     });
   });
+  exports.byId = function (id) {
+    return manager.byId(id);
+  }
 
   function Block(data, parent) {
     events.EventHandler.call(this);
@@ -350,65 +353,4 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
   exports.create = function (data, parent) {
     return new Block(data, parent);
   };
-
-  function hasDnDType(e, type) {
-    var types = e.dataTransfer.types;
-    if (C.isFunction(types.indexOf)) {
-      return types.indexOf(type) >= 0;
-    } else if (C.isFunction(types.includes)) {
-      return types.includes(type);
-    }
-    return false;
-  }
-
-  function Board(node) {
-    this.$node = d3.select(node);
-    this.$node.classed('selection-clearer', true).on('click', function () {
-      manager.clear();
-      idtypes.clearSelection();
-    });
-    var that = this;
-    this.$node.on('dragenter', function () {
-      var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
-        that.addPlaceholders();
-        return false;
-      }
-    }).on('dragover', function () {
-      var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
-        e.preventDefault();
-        return false;
-      }
-    }).on('dragleave', function () {
-      that.removePlaceholders();
-    }).on('drop', function () {
-      var e = d3.event;
-      e.preventDefault();
-      if (hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
-        var info = JSON.parse(e.dataTransfer.getData('application/caleydo-domino-dndinfo'));
-        var block = manager.byId(+info.block);
-        block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];
-        return false;
-      }
-      if (hasDnDType(e, 'application/caleydo-data-item')) {
-        var id = e.dataTransfer.getData('application/caleydo-data-item');
-        wrapper.data.get(id).then(function (d) {
-          var b = new Block(d, node.parentElement);
-          b.pos = [e.offsetX, e.offsetY];
-        });
-        return false;
-      }
-    });
-  }
-  Board.prototype.addPlaceholders = function() {
-
-  };
-  Board.prototype.removePlaceholders = function() {
-
-  };
-
-  exports.createBoard = function (node) {
-    return new Board(node);
-  }
 });
