@@ -39,14 +39,15 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
   });
   exports.byId = function (id) {
     return manager.byId(id);
-  }
+  };
 
-  function Block(data, parent) {
+  function Block(data, parent, board) {
     events.EventHandler.call(this);
     this.data = data;
     this.parent = parent;
+    this.board = board;
     this.$node = $('<div>').appendTo(parent).addClass('block');
-    this.$node[0].__data__ = data; //magic variable within d3
+    d3.select(this.$node[0]).datum(data); //magic variable within d3
     this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);
@@ -75,45 +76,29 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
       }
     });
     this.$node.attr('draggable', true)
-      .on('dragstart', function (event) {
-        var e = event.originalEvent;
-        e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
-        e.dataTransfer.setData('text/plain', data.desc.name);
-        e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
-        e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
-          block: that.id,
-          offsetX : e.offsetX,
-          offsetY : e.offsetY
-        }));
-        e.dataTransfer.setData('application/caleydo-data-item', data);
-      });
-
-    /*this.$node.draggable({
-      appendTo: parent,
-      containment: 'parent',
-      cursor: 'pointer',
-      delay: 150,
-      grid: [5, 5],
-      helper: function () {
-        var s = that.size;
-        return $('<div class="block_dragger">').css({
-          width: s[0],
-          height: s[1]
-        });
-      },
-      snap: true,
-      snapMode: 'outer',
-      stop: function (event, ui) {
-        that.pos = [ui.position.left, ui.position.top];
-      }
-    });*/
-
+      .on('dragstart', function (event) { return that.onDragStart(event); });
     this.actSorting = [];
     this.switchMode(mode);
     this.id = manager.nextId(this);
   }
   C.extendClass(Block, events.EventHandler);
 
+  Block.prototype.onDragStart = function (event) {
+    var e = event.originalEvent;
+    e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+    var data = this.data;
+    e.dataTransfer.setData('text/plain', data.desc.name);
+    e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
+    e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
+      block: this.id,
+      offsetX : e.offsetX,
+      offsetY : e.offsetY
+    }));
+    //encode the id in the mime type
+    e.dataTransfer.setData('application/caleydo-data-item-' + data.desc.id, data.desc.id);
+    this.board.currentlyDragged = data;
+    e.dataTransfer.setData('application/caleydo-data-item', data);
+  }
 
   Block.prototype.switchMode = function (m) {
     switch (m) {
@@ -350,7 +335,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
 
   exports.Block = Block;
 
-  exports.create = function (data, parent) {
-    return new Block(data, parent);
+  exports.create = function (data, parent, board) {
+    return new Block(data, parent, board);
   };
 });

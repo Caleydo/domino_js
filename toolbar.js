@@ -7,8 +7,7 @@ define(['exports', 'd3', '../caleydo/multiform', './block'], function (exports, 
   var manager = blocks.manager;
 
   function rebuildBlockToolBar(blocks) {
-    //wrap as array for d3
-    var $vistoolbar = $toolbar.select('#block-vis-toolbar').data([blocks]);
+    var $vistoolbar = $toolbar.select('#block-vis-toolbar').datum(blocks);
     var visses = multiform.toAvailableVisses(blocks.map(function (b) {
       return b.vis;
     }));

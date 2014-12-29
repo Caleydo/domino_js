@@ -40,6 +40,9 @@ require(['../caleydo/data', 'd3', 'jquery', '../caleydo/event', '../caleydo-sele
         e.dataTransfer.setData('text/plain', d.desc.name);
         e.dataTransfer.setData('application/json', JSON.stringify(d.desc));
         e.dataTransfer.setData('application/caleydo-data-item', d.desc.id);
+        //encode the id in the mime type
+        e.dataTransfer.setData('application/caleydo-data-item-' + d.desc.id, d.desc.id);
+        board.currentlyDragged = d;
       });
   });
 });
