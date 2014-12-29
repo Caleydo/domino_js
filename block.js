@@ -77,7 +77,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     this.$node.attr('draggable', true)
       .on('dragstart', function (event) {
         var e = event.originalEvent;
-        e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+        e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
         e.dataTransfer.setData('text/plain', data.desc.name);
         e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
         e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
