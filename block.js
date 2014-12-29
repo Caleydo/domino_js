@@ -2,8 +2,14 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../caleydo/event', '../caleydo/multiform', '../caleydo/idtype', '../caleydo/behavior', '../caleydo/geom', 'jquery-ui'], function (exports, $, d3, C, ranges, events, multiform, idtypes, behaviors, geom) {
+define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform', '../caleydo/behavior'], function (exports, $, d3, wrapper, multiform, behaviors) {
   "use strict";
+  var idtypes = wrapper.idtypes,
+    C = wrapper.C,
+    events = wrapper.events,
+    ranges  = wrapper.ranges,
+    geom = wrapper.geom;
+
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
 
@@ -37,6 +43,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     this.data = data;
     this.parent = parent;
     this.$node = $('<div>').appendTo(parent).addClass('block');
+    this.$node[0].__data__ = data; //magic variable within d3
     this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);
@@ -64,7 +71,18 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
         return false;
       }
     });
-    this.$node.draggable({
+    this.$node.attr('draggable', true)
+      .on('dragstart', function (event) {
+        var d = this.__data__;
+        var e = event.originalEvent;
+        e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
+        e.dataTransfer.setData('text/plain', d.desc.name);
+        e.dataTransfer.setData('application/json', JSON.stringify(d.desc));
+        e.dataTransfer.setData('application/caleydo-domino-block', that);
+        e.dataTransfer.setData('application/caleydo-data-item', d);
+      });
+
+    /*this.$node.draggable({
       appendTo: parent,
       containment: 'parent',
       cursor: 'pointer',
@@ -82,7 +100,8 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
       stop: function (event, ui) {
         that.pos = [ui.position.left, ui.position.top];
       }
-    });
+    });*/
+
     this.actSorting = [];
     this.switchMode(mode);
     this.id = manager.nextId(this);
@@ -94,11 +113,11 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
     switch (m) {
     case 'block':
       this.$content.addClass('mode-block');
-      this.$node.draggable('enable');
+      this.$node.attr('draggable', true);
       break;
     case 'select':
       this.$content.removeClass('mode-block');
-      this.$node.draggable('disable');
+      this.$node.attr('draggable', null);
       break;
     }
   };
@@ -328,4 +347,64 @@ define(['exports', 'jquery', 'd3', '../caleydo/main', '../caleydo/range', '../ca
   exports.create = function (data, parent) {
     return new Block(data, parent);
   };
+
+  function hasDnDType(e, type) {
+    var types = e.dataTransfer.types;
+    if (C.isFunction(types.indexOf)) {
+      return types.indexOf(type) >= 0;
+    } else if (C.isFunction(types.includes)) {
+      return types.includes(type);
+    }
+    return false;
+  }
+
+  function Board(node) {
+    this.$node = d3.select(node);
+    this.$node.classed('selection-clearer', true).on('click', function () {
+      manager.clear();
+      idtypes.clearSelection();
+    });
+    var that = this;
+    this.$node.on('dragenter', function () {
+      var e = d3.event;
+      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-block')) {
+        that.addPlaceholders();
+        return false;
+      }
+    }).on('dragover', function () {
+      var e = d3.event;
+      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-block')) {
+        e.preventDefault();
+        return false;
+      }
+    }).on('dragleave', function () {
+      that.removePlaceholders();
+    }).on('drop', function () {
+      var e = d3.event;
+      e.preventDefault();
+      if (hasDnDType(e, 'application/caleydo-domino-block')) {
+        var block = manager.byId(+e.dataTransfer.getData('application/caleydo-block'));
+        block.pos = [e.offsetX, e.offsetY];
+        return false;
+      }
+      if (hasDnDType(e, 'application/caleydo-data-item')) {
+        var id = e.dataTransfer.getData('application/caleydo-data-item');
+        wrapper.data.get(id).then(function (d) {
+          var b = new Block(d, node.parentElement);
+          b.pos = [e.offsetX, e.offsetY];
+        });
+        return false;
+      }
+    });
+  }
+  Board.prototype.addPlaceholders = function() {
+
+  };
+  Board.prototype.removePlaceholders = function() {
+
+  };
+
+  exports.createBoard = function (node) {
+    return new Board(node);
+  }
 });
