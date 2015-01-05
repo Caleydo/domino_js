@@ -98,7 +98,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     e.dataTransfer.setData('application/caleydo-data-item-' + data.desc.id, data.desc.id);
     this.board.currentlyDragged = data;
     e.dataTransfer.setData('application/caleydo-data-item', data);
-  }
+  };
 
   Block.prototype.switchMode = function (m) {
     switch (m) {
@@ -190,9 +190,8 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
         return r.map(function (loc) {
           return loc ? geom.wrap(loc).shift(p) : loc;
         });
-      } else {
-        return r ? geom.wrap(r).shift(p) : r;
       }
+      return r ? geom.wrap(r).shift(p) : r;
     });
   };
 
@@ -207,9 +206,8 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
         return r.map(function (loc) {
           return loc ? geom.wrap(loc).shift(p) : loc;
         });
-      } else {
-        return r ? geom.wrap(r).shift(p) : r;
       }
+      return r ? geom.wrap(r).shift(p) : r;
     });
   };
 
@@ -332,6 +330,13 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
   LinearBlock.prototype.push = function (block) {
     this.blocks.push(block);
   };
+  LinearBlock.prototype.pushLeft = function (block) {
+    this.blocks.unshift(block);
+  };
+  LinearBlock.prototype.remove = function (block) {
+    this.blocks.remove(block);
+  };
+
 
   exports.Block = Block;
 
