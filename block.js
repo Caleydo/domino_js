@@ -324,19 +324,130 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
     enumerable: true
   });
 
-  function LinearBlock() {
-    this.blocks = [];
+  function LinearBlockBlock(block, idtype) {
+    this.block = block;
+    this.sorting = NaN;
+    this.dim = this.block.idtypes.indexOf(idtype);
+  }
+  Object.defineProperty(LinearBlockBlock.prototype, 'isSorted', {
+    get : function () {
+      return !isNaN(this.sorting);
+    }
+  });
+  Object.defineProperty(LinearBlockBlock.prototype, 'isIncreasing', {
+    get : function () {
+      return !isNaN(this.sorting) && this.sorting > 0;
+    }
+  });
+  LinearBlockBlock.prototype.sort = function () {
+    return this.block.sort(this.dim, this.isIncreasing ? 'asc' : 'desc');
+  };
+  LinearBlockBlock.prototype.toCompareFunc = function () {
+    return toCompareFunc(this.block.data.desc, this.isIncreasing ? 'asc' : 'desc');
+  };
+  Object.defineProperty(LinearBlockBlock.prototype, 'range', {
+    get : function () {
+      return this.block.range.dim(this.dim);
+    },
+    set : function (value) {
+      var r = this.block.range.dims.slice();
+      r[this.dim] = value;
+      this.block.setRangeImpl(ranges.list(r));
+    }
+  });
+  function isBlock(block) {
+    return function (entry) {
+      return entry.block === block;
+    };
+  }
+  function shiftSorting(factor) {
+    return function (s) {
+      s.sorting += s.sorting < 0 ? -1 * factor : +1 * factor;
+    };
+  }
+  function LinearBlock(block, idtype) {
+    this.blocks = [ new LinearBlockBlock(block, idtype) ];
+    this.idtype = idtype;
+    this.update();
   }
   LinearBlock.prototype.push = function (block) {
-    this.blocks.push(block);
+    this.blocks.push(new LinearBlockBlock(block, this.idtype));
+    this.update();
   };
   LinearBlock.prototype.pushLeft = function (block) {
-    this.blocks.unshift(block);
+    this.blocks.unshift(new LinearBlockBlock(block, this.idtype));
+    this.update();
+  };
+  Object.defineProperty(LinearBlock.prototype, 'length', {
+    get : function () {
+      return this.blocks.length;
+    },
+    enumerable: true
+  });
+  LinearBlock.prototype.indexOf = function (block) {
+    return this.blocks.indexOf(isBlock(block));
+  };
+  LinearBlock.prototype.contains = function (block) {
+    return this.indexOf(block) >= 0;
+  };
+  LinearBlock.prototype.sortOrder = function () {
+    var r = this.blocks.filter(function (b) {
+      return !isNaN(b.sorting);
+    });
+    r = r.sort(function (a, b) {
+      return Math.abs(a.sorting) - Math.abs(b.sorting);
+    });
+    return r;
+  };
+  LinearBlock.prototype.sortBy = function (block) {
+    var i = this.indexOf(block);
+    if (i < 0) { //not part of sorting
+      return false;
+    }
+    var b = this.blocks[i];
+    var s = this.sortOrder();
+    if (isNaN(b.sorting)) { //not yet sorted
+      b.sorting = 1; //increasing at position 0
+      //shift by 1
+      s.forEach(shiftSorting(+1));
+    } else if (b.sorting > 0) { //already sorted by increasing
+      b.sorting = -b.sorting; //swap order
+    } else { //already sorting decreasing
+      i = Math.abs(b.sorting) - 1;
+      b.sorting = NaN;
+      s.slice(i + 1).forEach(shiftSorting(-1)); //shift to the left
+    }
+    this.update();
   };
   LinearBlock.prototype.remove = function (block) {
-    this.blocks.remove(block);
+    var i = this.indexOf(block);
+    var b = this.blocks.splice(i, 1)[0];
+    if (!isNaN(b.sorting)) {
+      var s = this.sortOrder();
+      i = Math.abs(b.sorting) - 1;
+      //as already removed from sortOrder
+      s.slice(i).forEach(shiftSorting(-1));
+    }
   };
+  LinearBlock.prototype.update = function () {
+    var s = this.sortOrder();
+    var active = s[0].range;
+    var cmps = s.map(function (b) { return b.toCompareFunc(); });
 
+    return C.all(s.map(function (b) {  return b.block.data(); })).then(function (datas) {
+      var sorted = active.sort(function (a, b) {
+        var i, j;
+        for (i = 0; i < cmps.length; ++i) {
+          j = cmps[i](a, b, datas[i]);
+          if (j !== 0) {
+            return j;
+          }
+        }
+        return 0;
+      });
+      s.forEach(function (b) {b.range = sorted; });
+    });
+  };
 
   exports.Block = Block;
 
