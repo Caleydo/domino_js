@@ -17,6 +17,7 @@ define(['exports', 'd3', '../caleydo/wrapper', '../caleydo-links/link', './block
     blocks.manager.on('remove', function (event, id, block) {
       that.links.remove(block);
     });
+    this.linearblocks = [];
 
     this.$node = d3.select(this.links.node);
     //clear on click on background
@@ -62,7 +63,7 @@ define(['exports', 'd3', '../caleydo/wrapper', '../caleydo-links/link', './block
       }
       //data move
       if (placeholders.hasDnDType(e, 'application/caleydo-data-item')) {
-        var id = e.dataTransfer.getData('application/caleydo-data-item');
+        var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
         wrapper.data.get(id).then(function (d) {
           var b = blocks.create(d, that.content, that);
           b.pos = [e.offsetX, e.offsetY];

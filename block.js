@@ -95,9 +95,10 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
       offsetY : e.offsetY
     }));
     //encode the id in the mime type
-    e.dataTransfer.setData('application/caleydo-data-item-' + data.desc.id, data.desc.id);
+    var p = JSON.stringify(data.persist());
+    e.dataTransfer.setData('application/caleydo-data-item', p);
+    e.dataTransfer.setData('application/caleydo-data-item-' +p, p);
     this.board.currentlyDragged = data;
-    e.dataTransfer.setData('application/caleydo-data-item', data);
   };
 
   Block.prototype.switchMode = function (m) {
@@ -450,6 +451,7 @@ define(['exports', 'jquery', 'd3', '../caleydo/wrapper', '../caleydo/multiform',
   };
 
   exports.Block = Block;
+  exports.LinearBlock = LinearBlock;
 
   exports.create = function (data, parent, board) {
     return new Block(data, parent, board);
