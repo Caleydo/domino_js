@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "dependencies": {
     "d3": "~3.5.2",
-    "bootstrap" : "~3.3.1"
+    "bootstrap" : "~3.3.4"
   },
   "caleydo" : {
     "plugins": [
