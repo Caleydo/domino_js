@@ -18,7 +18,7 @@ define(['../caleydo/data', 'd3', 'jquery', '../caleydo/event', '../caleydo-selec
 
   function toType(desc) {
     if (desc.type === 'vector') {
-      return desc.value.type === 'categorical' ? 'partition' : 'numerical';
+      return desc.value.type === 'categorical' ? 'stratification' : 'numerical';
     }
     return desc.type;
   }
@@ -26,7 +26,7 @@ define(['../caleydo/data', 'd3', 'jquery', '../caleydo/event', '../caleydo-selec
   data.list().then(function (items) {
     items = items.concat(splitTables(items));
     items = items.filter(function (d) {
-      return d.desc.type !== 'table';
+      return d.desc.type !== 'table' && d.desc.type !== 'stratification';
     });
     var $base = d3.select('#blockbrowser table tbody');
     var $rows = $base.selectAll('tr').data(items);
