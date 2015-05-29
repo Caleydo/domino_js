@@ -1,0 +1,12 @@
+[
+  {
+    "id": "country",
+    "name": "Country",
+    "names": "Countries"
+  },
+  {
+    "id": "artist",
+    "name": "Artist",
+    "names": "Artists"
+  }
+]

@@ -1,0 +1,13 @@
+ID	market	continent	sold singles (absolute)	sold albums (absolute)	retailvalue ($)	population (million)	sold singles (relative)	sold albums (relative)
+0	US	North America	1.5	225.8	3635.2	310.2	0.0048355899	0.7279174726
+1	Germany	Europe	6.8	98.7	1713.6	82.3	0.0826245443	1.1992709599
+2	UK	Europe	2.4	99.8	1388.1	62.3	0.0385232745	1.6019261637
+3	France	Europe	1.6	48.4	999.6	64.8	0.024691358	0.7469135802
+4	Australia	Australia	0	24.5	408	21.5	0	1.1395348837
+5	Canada	North America	0.2	25.9	343.2	33.7	0.0059347181	0.7685459941
+6	Italy	Europe	0.1	16	275.4	58.1	0.0017211704	0.2753872633
+7	Netherlands	Europe	0.5	16.7	270.2	16.8	0.0297619048	0.994047619
+8	Austria	Europe	0.1	7.5	184.1	8.2	0.012195122	0.9146341463
+9	Spain	Europe	0	10.5	183.2	46.8	0	0.2243589744
+10	Sweden	Europe	0.1	13.7	136.8	9.1	0.010989011	1.5054945055
+11	Ireland	Europe	0.2	4.9	77.9	4.4	0.0454545455	1.1136363636
