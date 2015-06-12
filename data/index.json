@@ -5,7 +5,7 @@
     "separator" : "\t",
     "size": [12, 13],
     "type": "table",
-    "rowtype": "artist",
+    "idtype": "artist",
     "columns": [
       {
         "name": "artist",
@@ -105,7 +105,7 @@
     "separator": "\t",
     "size": [12, 8],
     "type": "table",
-    "rowtype": "country",
+    "idtype": "country",
     "columns": [
       {
         "name": "market",
