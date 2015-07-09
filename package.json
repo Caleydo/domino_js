@@ -1,31 +1,32 @@
 {
-  "name" : "caleydo-vis-genome",
+  "name": "domino.js",
   "version": "0.0.1",
-  "dependencies": {
-    "d3": "~3.5.2",
-    "bootstrap" : "~3.3.4"
+  "peerDependencies": {
+    "caleydo_web": "*",
+    "caleydo_selectioninfo": "*",
+    "caleydo_links": "*"
   },
-  "caleydo" : {
-    "plugins": [
-      {
-        "type": "vis",
-        "id": "caleydo-vis-genome",
-        "name": "Genome",
-        "filter": "genomeDataLink"
-      },
-      {
-        "type": "datatype",
-        "id": "genomeDataLink",
-        "folder" : "caleydo-vis-genome",
-        "module": "caleydo-vis-genome/genomeDataLink"
+  "caleydo": {
+    "plugins": {
+      "web": {
+        "type": "app",
+        "name": "Domino.js"
       }
-    ],
+    },
+    "dependencies": {
+      "web": {
+        "d3": "~3.5.2",
+        "bootstrap": "~3.3.4"
+      }
+    },
     "requirejs-config": {
       "paths": {
         "bootstrap": "${baseUrl}/bootstrap/dist/js/bootstrap"
       },
       "shim": {
-        "bootstrap": ["css!${baseUrl}/bootstrap/dist/css/bootstrap"]
+        "bootstrap": [
+          "css!${baseUrl}/bootstrap/dist/css/bootstrap"
+        ]
       }
     }
   }

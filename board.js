@@ -3,7 +3,7 @@
  */
 /* global define */
 
-define(['exports', 'd3', '../caleydo/wrapper', '../caleydo-links/link', './block', './placeholder'], function (exports, d3, wrapper, links, blocks, placeholders) {
+define(['exports', 'd3', '../caleydo_web/wrapper', '../caleydo_links/link', './block', './placeholder'], function (exports, d3, wrapper, links, blocks, placeholders) {
   "use strict";
   var idtypes = wrapper.idtypes;
 
