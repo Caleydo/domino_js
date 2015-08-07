@@ -3,7 +3,7 @@
  */
 /* global define */
 
-define(['exports', 'd3', '../caleydo_web/wrapper', '../caleydo_web/vis'], function (exports, d3, wrapper, vis) {
+define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_core/vis'], function (exports, d3, wrapper, vis) {
   "use strict";
   //helper function since there are inconsistencies
   function hasDnDType(e, type) {

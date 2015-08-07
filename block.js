@@ -2,7 +2,7 @@
  * Created by Samuel Gratzl on 15.12.2014.
  */
 /** global define */
-define(['exports', 'jquery', 'd3', '../caleydo_web/wrapper', '../caleydo_web/multiform', '../caleydo_web/behavior'], function (exports, $, d3, wrapper, multiform, behaviors) {
+define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/multiform', '../caleydo_core/behavior'], function (exports, $, d3, wrapper, multiform, behaviors) {
   "use strict";
   var idtypes = wrapper.idtypes,
     C = wrapper.C,
