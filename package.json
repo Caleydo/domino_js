@@ -29,6 +29,7 @@
       },
       "shim": {
         "bootstrap": [
+          "jquery",
           "css!${baseUrl}/bootstrap/dist/css/bootstrap"
         ]
       }
