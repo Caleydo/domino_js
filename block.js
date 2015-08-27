@@ -183,11 +183,11 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
   Block.prototype.locate = function () {
     var vis = this.vis, that = this;
     if (!vis || !C.isFunction(vis.locate)) {
-      return C.resolved((arguments.length === 1 ? undefined : new Array(arguments.length)));
+      return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
     return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
       var p = that.pos;
-      if (C.isArray(r)) {
+      if (Array.isArray(r)) {
         return r.map(function (loc) {
           return loc ? geom.wrap(loc).shift(p) : loc;
         });
@@ -199,11 +199,11 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
   Block.prototype.locateById = function () {
     var vis = this.vis, that = this;
     if (!vis || !C.isFunction(vis.locateById)) {
-      return C.resolved((arguments.length === 1 ? undefined : new Array(arguments.length)));
+      return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
     return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
       var p = that.pos;
-      if (C.isArray(r)) {
+      if (Array.isArray(r)) {
         return r.map(function (loc) {
           return loc ? geom.wrap(loc).shift(p) : loc;
         });
@@ -236,7 +236,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
 
   Block.prototype.sort = function (dim, cmp) {
     if (dim > this.ndim) {
-      return C.resolved(null);
+      return Promise.resolve(null);
     }
     var r = this.range.dims.slice(); //work on copy
     var active = r[dim];
@@ -259,7 +259,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
       r[dim] = this.rangeUnsorted.dim(dim);
       console.log(active.toString(), ' -> ', r[dim].toString());
       this.setRangeImpl(ranges.list(r));
-      return C.resolved(this.range);
+      return Promise.resolve(this.range);
     }
 
     this.actSorting[dim] = cmp;
@@ -435,7 +435,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
     var active = s[0].range;
     var cmps = s.map(function (b) { return b.toCompareFunc(); });
 
-    return C.all(s.map(function (b) {  return b.block.data(); })).then(function (datas) {
+    return Promise.all(s.map(function (b) {  return b.block.data(); })).then(function (datas) {
       var sorted = active.sort(function (a, b) {
         var i, j;
         for (i = 0; i < cmps.length; ++i) {
