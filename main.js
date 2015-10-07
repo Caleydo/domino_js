@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 15.12.2014.
  */
-define(['../caleydo_core/data', 'd3', 'jquery', '../caleydo_core/event', '../caleydo_core/selectioninfo', './board', '../caleydo_core/idtype', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, $, events, selectionInfo, boards, idtypes, links) {
+define(['../caleydo_core/data', 'd3', 'jquery', '../caleydo_core/event', '../caleydo_d3/selectioninfo', './board', '../caleydo_core/idtype', './toolbar', 'bootstrap', 'font-awesome'], function (data, d3, $, events, selectionInfo, boards, idtypes, links) {
   'use strict';
   var info = selectionInfo.create(document.getElementById('selectioninfo'));
   var board = boards.create(document.getElementById('board'));
