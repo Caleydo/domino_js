@@ -6,31 +6,10 @@
 define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_core/vis'], function (exports, d3, wrapper, vis) {
   "use strict";
   //helper function since there are inconsistencies
-  function hasDnDType(e, type) {
-    var types = e.dataTransfer.types;
-    if (wrapper.C.isFunction(types.indexOf)) {
-      return types.indexOf(type) >= 0;
-    }
-    if (wrapper.C.isFunction(types.includes)) {
-      return types.includes(type);
-    }
-    return false;
-  }
+  exports.hasDnDType = wrapper.C.hasDnDType;
 
-  exports.hasDnDType = hasDnDType;
-
-  exports.copyDnD = function (e) {
-    var dT = e.dataTransfer;
-    return (e.ctrlKey && dT.effectAllowed.match(/copy/gi)) || (!dT.effectAllowed.match(/move/gi));
-  };
-  exports.updateDropEffect = function (e) {
-    var dT = e.dataTransfer;
-    if (exports.copyDnD(e)) {
-      dT.dropEffect = 'copy';
-    } else {
-      dT.dropEffect = 'move';
-    }
-  };
+  exports.copyDnD = wrapper.C.copyDnD;
+  exports.updateDropEffect = wrapper.C.updateDropEffect;
 
   function Placeholder(parent, pos, board) {
     var that = this;
@@ -47,7 +26,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_core/vis'], func
         return;
       }
       var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+      if (exports.hasDnDType(e, 'application/caleydo-data-item') || exports.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
         e.stopPropagation();
         board.overPlaceholder = true;
         e.preventDefault();
@@ -60,7 +39,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_core/vis'], func
       }
     }).on('dragover', function () {
       var e = d3.event;
-      if (hasDnDType(e, 'application/caleydo-data-item') || hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+      if (exports.hasDnDType(e, 'application/caleydo-data-item') || exports.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
         e.stopPropagation();
         e.preventDefault();
         return false;
