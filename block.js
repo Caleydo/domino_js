@@ -13,6 +13,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
   var manager = exports.manager = new idtypes.ObjectManager('block', 'Block');
   var mode = 'block'; //block, select, band
 
+  //CLUE CMD
   exports.switchMode = function (m) {
     if (m === mode) {
       return false;
@@ -48,6 +49,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
     this.board = board;
     this.$node = $('<div>').appendTo(parent).addClass('block');
     d3.select(this.$node[0]).datum(data); //magic variable within d3
+    //CLUE CMD
     this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);

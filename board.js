@@ -55,8 +55,10 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_links/link', './
         var info = JSON.parse(e.dataTransfer.getData('application/caleydo-domino-dndinfo'));
         var block = blocks.byId(+info.block);
         if (placeholders.copyDnD(e)) { //create a copy
+          //CLUE CMD
           block = blocks.create(block.data, that.content, that);
         }
+        //CLUE CMD
         block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];
         that.removePlaceholders();
         return false;
@@ -65,6 +67,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_links/link', './
       if (placeholders.hasDnDType(e, 'application/caleydo-data-item')) {
         var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
         wrapper.data.get(id).then(function (d) {
+          //CLUE CMD
           var b = blocks.create(d, that.content, that);
           b.pos = [e.offsetX, e.offsetY];
         });
