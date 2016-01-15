@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 16.12.2014.
  */
-define(['exports', 'd3', './block', ''], function (exports, d3, blocks) {
+define(['exports', 'd3', './block'], function (exports, d3, blocks) {
   "use strict";
   exports.createLayer = function (parent) {
     var $div = d3.select(parent).append('div');

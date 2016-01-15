@@ -1,8 +1,8 @@
 {
-  "name": "domino.js",
+  "name": "domino_js",
   "version": "0.0.1",
   "license" : "SEE LICENSE IN LICENSE",
-  "repository": "Caleydo/domino.js",
+  "repository": "Caleydo/domino_js",
   "dependencies": {
   },
   "peerDependencies": {
