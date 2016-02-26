@@ -32,10 +32,10 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
 
   manager.on('select', function (event, type) {
     manager.forEach(function (block) {
-      block.$node.removeClass('select-' + type);
+      block.$node.removeClass('caleydo-select-' + type);
     });
     manager.selectedObjects(type).forEach(function (block) {
-      block.$node.addClass('select-' + type);
+      block.$node.addClass('caleydo-select-' + type);
     });
   });
   exports.byId = function (id) {
