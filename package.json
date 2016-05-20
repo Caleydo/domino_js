@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "license" : "SEE LICENSE IN LICENSE",
   "repository": "Caleydo/domino_js",
+  "homepage": "http://www.caleydo.org/tools/domino/",
   "dependencies": {
   },
   "peerDependencies": {
@@ -10,6 +11,7 @@
     "caleydo_vis": "*"
   },
   "caleydo": {
+    "type": "app",
     "plugins": {
       "web": {
         "type": "app",
