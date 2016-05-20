@@ -1,5 +1,6 @@
 {
   "name": "domino_js",
+  "description": "Domino Caleydo Web application",
   "version": "0.0.1",
   "license" : "SEE LICENSE IN LICENSE",
   "repository": "Caleydo/domino_js",
