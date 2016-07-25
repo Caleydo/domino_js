@@ -6,6 +6,9 @@ define(['../caleydo_core/data', 'd3', 'jquery', '../caleydo_core/event', '../cal
   var info = selectionInfo.create(document.getElementById('selectioninfo'));
   var board = boards.create(document.getElementById('board'));
 
+  $(document).keydown(boards.digestKeyCode);
+
+
   function splitTables(items) {
     var r = [];
     items.forEach(function (entry) {

@@ -10,7 +10,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
   function Board(node) {
     var that = this;
     this.content = node;
-    this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom']);
+    this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'], {filter: this.areBlocksInLineOfSight});
     blocks.manager.on('add', function (event, id, block) {
       that.links.push(block);
     });
@@ -59,8 +59,12 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
           block = blocks.create(block.data, that.content, that);
         }
         //CLUE CMD
-        block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];
+
+        block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];//[e.layerX, e.layerY];
+        block.$node.css('opacity', '1');
+
         that.removePlaceholders();
+        that.currentlyDragged = null;
         return false;
       }
       //data move
@@ -72,10 +76,41 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
           b.pos = [e.offsetX, e.offsetY];
         });
         that.removePlaceholders();
+        that.currentlyDragged = null;
         return false;
       }
     });
   }
+
+  Board.prototype.areBlocksInLineOfSight = function(a, b) {
+    var manager = blocks.manager;
+    var retval = { val : true};
+    
+    manager.forEach(function(block) {
+      var a = this[0];
+      var b = this[1];
+      var retval = this[2];
+
+      if(!retval.val) {
+        return;
+      }
+
+      if(block.id !== a.id && block.id !== b.id) {
+        var leftelempos = b.$node[0].offsetLeft;
+        var rightelempos = a.$node[0].offsetLeft;
+        if(a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
+           leftelempos = a.$node[0].offsetLeft;
+           rightelempos = b.$node[0].offsetleft;
+        }
+
+        if(leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
+          retval.val = false;
+        }
+      }
+
+    }, [a,b,retval]);
+    return retval.val;
+  };
 
   Board.prototype.addPlaceholders = function () {
     if (placeholders.anyShown(this.links.node)) {
@@ -102,11 +137,49 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
       preview = blocks.byId(+info.block);
     }
     //TODO
+    console.log("persistPreview");
     preview.pos = [p[0] - 60, p[1] ];
     this.removePlaceholders();
   };
   Board.prototype.removePreview = function (preview) {
     preview.destroy();
+  };
+
+  exports.digestKeyCode = function(e) {
+    function moveSelectedBlock(x, y) {
+      var selected_blocks = blocks.manager.selections();
+      if(selected_blocks) {
+        var dims = selected_blocks.dims[0];
+        if(dims) {
+          var srelem = dims.arr[0];
+          if(srelem) {
+            var bid = srelem.from;
+            var block = blocks.manager.byId(bid);
+            if(block) {
+              block.pos = [block.pos[0] + x, block.pos[1] + y];
+            }
+          }
+        }
+      }
+    };
+
+    switch(e.which) {
+      case 37: // left
+        moveSelectedBlock(-5,  0);
+        break;
+      case 38: // up
+        moveSelectedBlock(0, -5);
+        break;
+      case 39: // right
+        moveSelectedBlock(5,  0);
+        break;
+      case 40: // down
+        moveSelectedBlock(0, 5);
+        break;
+      default:
+        return; // exit this handler for other keys
+    }
+    e.preventDefault(); // prevent the default action (scroll / move caret)
   };
 
   exports.create = function (content) {

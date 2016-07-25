@@ -78,7 +78,10 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
       }
     });
     this.$node.attr('draggable', true)
-      .on('dragstart', function (event) { return that.onDragStart(event); });
+      .on('dragstart', function (event) { return that.onDragStart(event); })
+      .on('drag', function(event) {
+        console.log('dragging');
+      });
     this.actSorting = [];
     this.switchMode(mode);
     this.id = manager.nextId(this);
@@ -94,13 +97,23 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
     e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
       block: this.id,
       offsetX : e.offsetX,
-      offsetY : e.offsetY
+      offsetY : e.offsetY,
+      layerX : e.layerX,
+      layerY : e.layerY
     }));
     //encode the id in the mime type
     var p = JSON.stringify(data.persist());
     e.dataTransfer.setData('application/caleydo-data-item', p);
     e.dataTransfer.setData('application/caleydo-data-item-' +p, p);
+//    var dragimg = document.createElement('span');
+//    dragimg.setAttribute('style',
+//  'position: absolute; display: none; top: 0; left: 0; width: 0; height: 0;' );
+//    e.dataTransfer.setDragImage(dragimg, 0, 0);
     this.board.currentlyDragged = data;
+    //backup the current position
+    this.startpos = this.pos;
+    this.$node.css('opacity', '0.5');
+    this.$node.css('filter', 'alpha(opacity=50)');
   };
 
   Block.prototype.switchMode = function (m) {
