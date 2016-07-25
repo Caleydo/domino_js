@@ -83,6 +83,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
   }
 
   Board.prototype.areBlocksInLineOfSight = function(a, b) {
+    console.log("check block occlusion");
     var manager = blocks.manager;
     var retval = { val : true};
     
@@ -100,7 +101,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
         var rightelempos = a.$node[0].offsetLeft;
         if(a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
            leftelempos = a.$node[0].offsetLeft;
-           rightelempos = b.$node[0].offsetleft;
+           rightelempos = b.$node[0].offsetLeft;
         }
 
         if(leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
