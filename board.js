@@ -72,9 +72,6 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
         var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
         wrapper.data.get(id).then(function (d) {
           //CLUE CMD
-          //var b = blocks.create(d, that.content, that);
-          //b.pos = [e.offsetX, e.offsetY];
-          //b.id = blocks.manager.nextId(b);
           blocks.createAt(d, that.content, that, e.offsetX, e.offsetY);
         });
         that.removePlaceholders();
