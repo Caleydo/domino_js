@@ -84,7 +84,7 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
       });
     this.actSorting = [];
     this.switchMode(mode);
-    this.id = manager.nextId(this);
+    //this.id = manager.nextId(this);
   }
   C.extendClass(Block, events.EventHandler);
 
@@ -467,8 +467,21 @@ define(['exports', 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/m
 
   exports.Block = Block;
   exports.LinearBlock = LinearBlock;
-
+  
+  /**
+   * Creates a block, does not interact with the block manager
+   */
   exports.create = function (data, parent, board) {
     return new Block(data, parent, board);
   };
-});
+
+  /**
+   * Creates a block at position (x,y) and adds it to the manager
+   */
+  exports.createAt = function (data, parent, board, x, y) {
+    var block = exports.create(data,parent,board);
+    block.pos = [x, y];
+    block.id = manager.nextId(block);
+    return block;
+  }
+ });
