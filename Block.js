@@ -46,14 +46,31 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
     ;
     /**
      * Creates a block at position (x,y) and adds it to the manager
+     * @param data
+     * @param parent
+     * @param board
+     * @param pos
+     * @returns {Block}
      */
-    function createBlockAt(data, parent, board, x, y) {
+    function createBlockAt(data, parent, board, pos) {
         var block = new Block(data, parent, board);
-        block.pos = [x, y];
+        block.pos = pos;
         block.id = exports.manager.nextId(block);
         return block;
     }
     exports.createBlockAt = createBlockAt;
+    /**
+     * Create a block at a certain position without adding it to the block manager
+     * @param data The block's data
+     * @param pos A number array with 2 elements containing the creation position [x,y]
+     * @returns {Block}
+     */
+    function createPreview(data, pos) {
+        var b = new Block(data, this.content, this);
+        b.pos = [pos[0] + 60, pos[1]];
+        return b;
+    }
+    exports.createPreview = createPreview;
     var Block = (function (_super) {
         __extends(Block, _super);
         function Block(data, parent, board) {

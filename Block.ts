@@ -52,12 +52,29 @@ export function byId(id) {
 
 /**
  * Creates a block at position (x,y) and adds it to the manager
+ * @param data
+ * @param parent
+ * @param board
+ * @param pos
+ * @returns {Block}
  */
-export function createBlockAt(data, parent:Element, board:board.Board, x, y) {
+export function createBlockAt(data, parent:Element, board:board.Board, pos:[number, number]) {
   var block = new Block(data, parent, board);
-  block.pos = [x, y];
+  block.pos = pos;
   block.id = manager.nextId(block);
   return block;
+}
+
+/**
+ * Create a block at a certain position without adding it to the block manager
+ * @param data The block's data
+ * @param pos A number array with 2 elements containing the creation position [x,y]
+ * @returns {Block}
+ */
+export function createPreview(data, pos:[number, number]) {
+    var b = new Block(data, this.content, this);
+    b.pos = [pos[0] + 60, pos[1] ];
+    return b;
 }
 
 export class Block extends events.EventHandler {
