@@ -44,6 +44,32 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
     }
     exports.byId = byId;
     ;
+    function areBlocksInLineOfSight(a, b) {
+        console.log("check block occlusion");
+        var retval = { val: true };
+        exports.manager.forEach(function (block) {
+            var a = this[0];
+            var b = this[1];
+            var retval = this[2];
+            if (!retval.val) {
+                return;
+            }
+            if (block.id !== a.id && block.id !== b.id) {
+                var leftelempos = b.$node[0].offsetLeft;
+                var rightelempos = a.$node[0].offsetLeft;
+                if (a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
+                    leftelempos = a.$node[0].offsetLeft;
+                    rightelempos = b.$node[0].offsetLeft;
+                }
+                if (leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
+                    retval.val = false;
+                }
+            }
+        }, [a, b, retval]);
+        return retval.val;
+    }
+    exports.areBlocksInLineOfSight = areBlocksInLineOfSight;
+    ;
     /**
      * Creates a block at position (x,y) and adds it to the manager
      * @param data
@@ -59,18 +85,6 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
         return block;
     }
     exports.createBlockAt = createBlockAt;
-    /**
-     * Create a block at a certain position without adding it to the block manager
-     * @param data The block's data
-     * @param pos A number array with 2 elements containing the creation position [x,y]
-     * @returns {Block}
-     */
-    function createPreview(data, pos) {
-        var b = new Block(data, this.content, this);
-        b.pos = [pos[0] + 60, pos[1]];
-        return b;
-    }
-    exports.createPreview = createPreview;
     var Block = (function (_super) {
         __extends(Block, _super);
         function Block(data, parent, board) {

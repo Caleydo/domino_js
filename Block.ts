@@ -50,6 +50,36 @@ export function byId(id) {
   return manager.byId(id);
 };
 
+export function areBlocksInLineOfSight(a:Block, b:Block) {
+  console.log("check block occlusion");
+  var retval = { val : true};
+
+  manager.forEach(function(block) {
+    var a = this[0];
+    var b = this[1];
+    var retval = this[2];
+
+    if(!retval.val) {
+      return;
+    }
+
+    if(block.id !== a.id && block.id !== b.id) {
+      var leftelempos = b.$node[0].offsetLeft;
+      var rightelempos = a.$node[0].offsetLeft;
+      if(a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
+         leftelempos = a.$node[0].offsetLeft;
+         rightelempos = b.$node[0].offsetLeft;
+      }
+
+      if(leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
+        retval.val = false;
+      }
+    }
+
+  }, [a,b,retval]);
+  return retval.val;
+};
+
 /**
  * Creates a block at position (x,y) and adds it to the manager
  * @param data
@@ -63,18 +93,6 @@ export function createBlockAt(data, parent:Element, board:board.Board, pos:[numb
   block.pos = pos;
   block.id = manager.nextId(block);
   return block;
-}
-
-/**
- * Create a block at a certain position without adding it to the block manager
- * @param data The block's data
- * @param pos A number array with 2 elements containing the creation position [x,y]
- * @returns {Block}
- */
-export function createPreview(data, pos:[number, number]) {
-    var b = new Block(data, this.content, this);
-    b.pos = [pos[0] + 60, pos[1] ];
-    return b;
 }
 
 export class Block extends events.EventHandler {
