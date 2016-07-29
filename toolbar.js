@@ -1,7 +1,7 @@
 /**
  * Created by Samuel Gratzl on 16.12.2014.
  */
-define(['exports', 'd3', '../caleydo_core/multiform', './block'], function (exports, d3, multiform, blocks) {
+define(['exports', 'd3', '../caleydo_core/multiform', './block_OLD'], function (exports, d3, multiform, blocks) {
   "use strict";
   var $toolbar = d3.select('#block-toolbar');
   var manager = blocks.manager;

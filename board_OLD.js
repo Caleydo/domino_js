@@ -3,7 +3,8 @@
  */
 /* global define */
 
-define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './block', './placeholder'], function (exports, d3, wrapper, links, blocks, placeholders) {
+define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './block_OLD', './placeholder_OLD'],
+  function (exports, d3, wrapper, links, blocks, placeholders) {
   "use strict";
   var idtypes = wrapper.idtypes;
 
@@ -85,7 +86,7 @@ define(['exports', 'd3', '../caleydo_core/wrapper', '../caleydo_d3/link', './blo
     console.log("check block occlusion");
     var manager = blocks.manager;
     var retval = { val : true};
-    
+
     manager.forEach(function(block) {
       var a = this[0];
       var b = this[1];
