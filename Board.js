@@ -21,10 +21,18 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             });
             //dnd operation
             this.$node
-                .on('dragenter', function () { _this.dragEnter(); })
-                .on('dragover', function () { _this.dragOver(); })
-                .on('dragleave', function () { _this.dragLeave(); })
-                .on('drop', function () { _this.drop(); });
+                .on('drop', function () {
+                return _this.drop();
+            })
+                .on('dragenter', function () {
+                return _this.dragEnter();
+            })
+                .on('dragover', function () {
+                return _this.dragOver();
+            })
+                .on('dragleave', function () {
+                return _this.dragLeave();
+            });
         }
         Object.defineProperty(Board.prototype, "currentlyDragged", {
             get: function () {
@@ -46,12 +54,23 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
         Board.prototype.removePreview = function () {
             this.preview.destroy();
         };
-        ;
         Board.prototype.dragEnter = function () {
+            console.log('dragEnter');
+            var e = d3.event;
+            if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+                return false;
+            }
         };
         Board.prototype.dragOver = function () {
+            console.log('dragOver');
+            var e = d3.event;
+            if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+                e.preventDefault();
+                return false;
+            }
         };
         Board.prototype.dragLeave = function () {
+            console.log('dragLeave');
         };
         Board.prototype.drop = function () {
             console.log('drop');
@@ -74,9 +93,10 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             //data move
             if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item')) {
                 var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
+                var that = this;
                 wrapper.data.get(id).then(function (d) {
                     //CLUE CMD
-                    blocks.createBlockAt(d, this.content, this, [e.offsetX, e.offsetY]);
+                    blocks.createBlockAt(d, that.content, that, [e.offsetX, e.offsetY]);
                 });
                 this.currentlyDragged = null;
                 return false;

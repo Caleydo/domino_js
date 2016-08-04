@@ -17,15 +17,22 @@ class Domino extends views.AView {
   private browser:blockbrowser.Blockbrowser;
   private info:selectionInfo.SelectionInfo;
 
-  constructor(parent: Element) {
+  constructor() {
     super();
     $(document).keydown((e:KeyboardEvent) => {this.digestKeyCode(e)});
 
     this.board = new boards.Board(document.getElementById('board'));
-    this.info = selectionInfo.create(document.getElementById('selectionInfo'));
+    this.info = selectionInfo.create(document.getElementById('selectioninfo'));
+    this.browser = new blockbrowser.Blockbrowser(document.getElementById('blockbrowser'));
 
-    var dataVectors = data.list().then(data.convertTableToVectors);
+  }
 
+  public execute():void {
+    data.list().then((items) => {
+      var listItems:blockbrowser.BlockbrowserItem[] = blockbrowser.convertToBlockbrowserItems(items);
+      this.browser.addItems(listItems);
+      this.browser.render();
+    });
   }
 
   private digestKeyCode(e:KeyboardEvent) {
@@ -57,6 +64,6 @@ class Domino extends views.AView {
 
 }
 
-export function create(parent: Element) {
-    return new Domino(parent);
+export function create() {
+    return new Domino();
 }

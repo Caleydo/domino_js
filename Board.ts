@@ -33,10 +33,18 @@ export class Board {
 
     //dnd operation
     this.$node
-      .on('dragenter', () => {this.dragEnter()})
-      .on('dragover', () => {this.dragOver()})
-      .on('dragleave', () => {this.dragLeave()})
-      .on('drop', () => {this.drop()});
+      .on('drop', () => {
+        return this.drop();
+      })
+      .on('dragenter', () => {
+        return this.dragEnter();
+      })
+      .on('dragover', () => {
+        return this.dragOver();
+      })
+      .on('dragleave', () => {
+        return this.dragLeave();
+      });
   }
 
   public get currentlyDragged():blocks.Block  {
@@ -57,18 +65,27 @@ export class Board {
 
   public removePreview():void {
       this.preview.destroy();
-  };
+  }
 
   private dragEnter() {
-
+    console.log('dragEnter');
+    var e = <DragEvent> d3.event;
+    if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+      return false;
+    }
   }
 
   private dragOver() {
-
+    console.log('dragOver');
+    var e = <DragEvent> d3.event;
+    if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+      e.preventDefault();
+      return false;
+    }
   }
 
   private dragLeave() {
-
+    console.log('dragLeave');
   }
 
   private drop() {
@@ -94,9 +111,10 @@ export class Board {
     //data move
     if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item')) {
       var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
-      wrapper.data.get(id).then(function (d) {
+      var that = this;
+      wrapper.data.get(id).then((d) => {
         //CLUE CMD
-        blocks.createBlockAt(d, this.content, this, [e.offsetX, e.offsetY]);
+        blocks.createBlockAt(d, that.content, that, [e.offsetX, e.offsetY]);
       });
       this.currentlyDragged = null;
       return false;

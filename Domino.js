@@ -6,18 +6,26 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define(["require", "exports", '../caleydo_core/layout_view', '../caleydo_core/data', 'jquery', '../caleydo_d3/selectioninfo', './Board', './Block'], function (require, exports, views, data, $, selectionInfo, boards, blocks) {
+define(["require", "exports", '../caleydo_core/layout_view', '../caleydo_core/data', 'jquery', '../caleydo_d3/selectioninfo', './Board', './Blockbrowser', './Block'], function (require, exports, views, data, $, selectionInfo, boards, blockbrowser, blocks) {
     "use strict";
     var Domino = (function (_super) {
         __extends(Domino, _super);
-        function Domino(parent) {
+        function Domino() {
             var _this = this;
             _super.call(this);
             $(document).keydown(function (e) { _this.digestKeyCode(e); });
             this.board = new boards.Board(document.getElementById('board'));
-            this.info = selectionInfo.create(document.getElementById('selectionInfo'));
-            var dataVectors = data.list().then(data.convertTableToVectors);
+            this.info = selectionInfo.create(document.getElementById('selectioninfo'));
+            this.browser = new blockbrowser.Blockbrowser(document.getElementById('blockbrowser'));
         }
+        Domino.prototype.execute = function () {
+            var _this = this;
+            data.list().then(function (items) {
+                var listItems = blockbrowser.convertToBlockbrowserItems(items);
+                _this.browser.addItems(listItems);
+                _this.browser.render();
+            });
+        };
         Domino.prototype.digestKeyCode = function (e) {
             function moveSelectedBlock(x, y) {
                 var selected_blocks = blocks.manager.selections();
@@ -46,8 +54,8 @@ define(["require", "exports", '../caleydo_core/layout_view', '../caleydo_core/da
         };
         return Domino;
     }(views.AView));
-    function create(parent) {
-        return new Domino(parent);
+    function create() {
+        return new Domino();
     }
     exports.create = create;
 });
