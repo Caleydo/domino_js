@@ -153,7 +153,7 @@ export class Block extends events.EventHandler {
         return that.onDragStart(event);
       })
       .on('drag', function (event) {
-        console.log('dragging');
+        //console.log('dragging');
       });
     this.actSorting = [];
     this.switchMode(mode);
@@ -169,7 +169,7 @@ export class Block extends events.EventHandler {
   };
 
   public get data() {
-    return this.data;
+    return this._data;
   }
 
   public onDragStart(event) {
@@ -189,10 +189,6 @@ export class Block extends events.EventHandler {
     var p = JSON.stringify(data.persist());
     e.dataTransfer.setData('application/caleydo-data-item', p);
     e.dataTransfer.setData('application/caleydo-data-item-' +p, p);
-  //    var dragimg = document.createElement('span');
-  //    dragimg.setAttribute('style',
-  //  'position: absolute; display: none; top: 0; left: 0; width: 0; height: 0;' );
-  //    e.dataTransfer.setDragImage(dragimg, 0, 0);
     this.board.currentlyDragged = data;
     //backup the current position
     this.startpos = this.pos;

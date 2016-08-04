@@ -29,7 +29,8 @@ define(["require", "exports", '../caleydo_core/layout_view', '../caleydo_core/da
         Domino.prototype.digestKeyCode = function (e) {
             function moveSelectedBlock(x, y) {
                 var selected_blocks = blocks.manager.selections();
-                selected_blocks.forEach(function (block, index) {
+                selected_blocks.dim(0).asList().forEach(function (id) {
+                    var block = blocks.manager.byId(id);
                     block.moveBy(x, y);
                 });
             }

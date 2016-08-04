@@ -78,6 +78,7 @@ export class Board {
   private dragOver() {
     console.log('dragOver');
     var e = <DragEvent> d3.event;
+    this.links.update();
     if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
       e.preventDefault();
       return false;

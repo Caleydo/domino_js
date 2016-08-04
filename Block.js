@@ -130,7 +130,7 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
                 return that.onDragStart(event);
             })
                 .on('drag', function (event) {
-                console.log('dragging');
+                //console.log('dragging');
             });
             this.actSorting = [];
             this.switchMode(mode);
@@ -146,7 +146,7 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
         ;
         Object.defineProperty(Block.prototype, "data", {
             get: function () {
-                return this.data;
+                return this._data;
             },
             enumerable: true,
             configurable: true
@@ -168,10 +168,6 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             var p = JSON.stringify(data.persist());
             e.dataTransfer.setData('application/caleydo-data-item', p);
             e.dataTransfer.setData('application/caleydo-data-item-' + p, p);
-            //    var dragimg = document.createElement('span');
-            //    dragimg.setAttribute('style',
-            //  'position: absolute; display: none; top: 0; left: 0; width: 0; height: 0;' );
-            //    e.dataTransfer.setDragImage(dragimg, 0, 0);
             this.board.currentlyDragged = data;
             //backup the current position
             this.startpos = this.pos;

@@ -7,6 +7,7 @@ import data = require('../caleydo_core/data');
 import d3 = require('d3');
 import $ = require('jquery');
 import events = require('../caleydo_core/event');
+import range = require('../caleydo_core/range');
 import selectionInfo = require('../caleydo_d3/selectioninfo');
 import boards = require('./Board');
 import blockbrowser = require('./Blockbrowser');
@@ -37,8 +38,9 @@ class Domino extends views.AView {
 
   private digestKeyCode(e:KeyboardEvent) {
     function moveSelectedBlock(x, y) {
-      var selected_blocks:blocks.Block[] = blocks.manager.selections();
-      selected_blocks.forEach((block:blocks.Block, index:number) => {
+      var selected_blocks:range.Range = blocks.manager.selections();
+      selected_blocks.dim(0).asList().forEach((id) => {
+        var block:blocks.Block = blocks.manager.byId(id);
         block.moveBy(x, y);
       });
     };

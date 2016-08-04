@@ -64,6 +64,7 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
         Board.prototype.dragOver = function () {
             console.log('dragOver');
             var e = d3.event;
+            this.links.update();
             if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
                 e.preventDefault();
                 return false;
