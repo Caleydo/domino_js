@@ -6,7 +6,8 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             var _this = this;
             var that = this;
             this.content = node;
-            this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'], { filter: function (a, b) {
+            this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'], {
+                filter: function (a, b) {
                     console.log("check block occlusion");
                     var retval = { val: true };
                     _this.blocks.manager.forEach(function (block) {
@@ -29,17 +30,18 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
                         }
                     }, [a, b, retval]);
                     return retval.val;
-                } });
+                }
+            });
             this.blocks = {
                 currentlyDragged: null,
                 manager: new idtypes.ObjectManager('block', 'Block')
             };
             this.blocks.manager.on('select', function (event, type) {
                 that.blocks.manager.forEach(function (block) {
-                    block.$node.removeClass('caleydo-select-' + type);
+                    block.$container.removeClass('caleydo-select-' + type);
                 });
                 that.blocks.manager.selectedObjects(type).forEach(function (block) {
-                    block.$node.addClass('caleydo-select-' + type);
+                    block.$container.addClass('caleydo-select-' + type);
                 });
             });
             this.blocks.manager.on('add', function (event, id, block) {
@@ -55,21 +57,25 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
                 idtypes.clearSelection();
             });
             //dnd operation
-            this.$node
-                .on('drop', function () {
-                return _this.drop();
-            })
-                .on('dragenter', function () {
-                return _this.dragEnter();
-            })
-                .on('dragover', function () {
-                return _this.dragOver();
-            })
-                .on('dragleave', function () {
-                return _this.dragLeave();
-            })
-                .on('mousemove', function () {
-                return _this.mouseMove();
+            this.$node.on({
+                'drop': function () {
+                    _this.drop();
+                },
+                'dragenter': function () {
+                    _this.dragEnter();
+                },
+                'dragover': function () {
+                    _this.dragOver();
+                },
+                'dragleave': function () {
+                    _this.dragLeave();
+                },
+                'mousemove': function () {
+                    _this.mouseMove();
+                },
+                'mouseup': function () {
+                    _this.mouseUp();
+                }
             });
         }
         Object.defineProperty(Board.prototype, "currentlyDragged", {
@@ -82,7 +88,22 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             enumerable: true,
             configurable: true
         });
+        Board.prototype.mouseUp = function () {
+            if (null !== this.blocks.currentlyDragged) {
+                this.blocks.currentlyDragged.dragging = false;
+            }
+        };
         Board.prototype.mouseMove = function () {
+            if (null !== this.blocks.currentlyDragged) {
+                var e = d3.event;
+                var coords = [e.offsetX, e.offsetY];
+                var blockOffset = this.blocks.currentlyDragged.dragOffset;
+                if (false !== blockOffset) {
+                    coords[0] -= blockOffset[0];
+                    coords[1] -= blockOffset[1];
+                }
+                this.blocks.currentlyDragged.pos = coords;
+            }
         };
         Board.prototype.dragEnter = function () {
             console.log('dragEnter');
@@ -108,20 +129,6 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             console.log('drop');
             var e = d3.event;
             e.preventDefault();
-            //internal move
-            if (wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
-                var info = JSON.parse(e.dataTransfer.getData('application/caleydo-domino-dndinfo'));
-                var block = this.blocks.manager.byId(+info.block);
-                if (wrapper.C.copyDnD(e)) {
-                    //CLUE CMD
-                    block = blocks.createBlock(block.data, this.content, this, this.blocks.manager);
-                }
-                //CLUE CMD
-                block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY]; //[e.layerX, e.layerY];
-                block.$node.css('opacity', '1');
-                this.currentlyDragged = null;
-                return false;
-            }
             //data move
             if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item')) {
                 var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
@@ -138,18 +145,19 @@ define(["require", "exports", 'd3', '../caleydo_core/wrapper', '../caleydo_core/
             var _this = this;
             e.preventDefault(); // prevent the default action (scroll / move caret)
             var dxy = [0, 0];
+            var amount = e.ctrlKey ? 15 : 5;
             switch (e.which) {
                 case 37:
-                    dxy[0] = -5;
+                    dxy[0] -= amount;
                     break;
                 case 38:
-                    dxy[1] = -5;
+                    dxy[1] -= amount;
                     break;
                 case 39:
-                    dxy[0] = 5;
+                    dxy[0] = amount;
                     break;
                 case 40:
-                    dxy[1] = 5;
+                    dxy[1] = amount;
                     break;
                 default:
                     return; // exit this handler for other keys

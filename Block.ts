@@ -42,13 +42,14 @@ export function createBlock(data, parent:Element, board:board.Board, manager) {
 }
 
 export class Block<Decorator extends blockDecorator.IObjectDecorator> extends events.EventHandler implements blockDecorator.IDecorableObject {
-  public $node;
+  public $node:JQuery;
+  public $container:JQuery;
   public id;
 
   private _data;
   private parent:Element;
   private board:board.Board;
-  private zoom:behaviors.ZoomBehavior;
+  public zoom:behaviors.ZoomBehavior;
   private $content;
   private actSorting = [];
   private rangeUnsorted;
@@ -57,22 +58,33 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
   private vis;
   private visMeta;
 
-  private sticksToMouse:boolean = false;
+  private dragData: {
+    startOffset:[number, number];
+    currentlyDragged:boolean;
+  };
+
   private rotationAngle:number = 0;
 
   constructor(data, parent:Element, board:board.Board, private decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
     super();
+    this.dragData = {
+      startOffset:[0,0],
+      currentlyDragged:false
+    };
+
     events.EventHandler.call(this);
     this.decorator.decoratedObject = this;
     this._data = data;
     this.parent = parent;
     this.board = board;
-    this.$node = $('<div>').appendTo(parent).addClass('block');
+    this.$container = $('<div>').appendTo(parent).addClass('blockContainer');
+    this.decorator.decorateHeader(this.$container);
+    this.$node = $('<div>').appendTo(this.$container).addClass('block');
+
     d3.select(this.$node[0]).datum(data); //magic variable within d3
     //CLUE CMD
     this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
-    this.decorator.decorateHeader();
     this.$content = $('<div>').appendTo(this.$node);
     var that = this;
     this.rangeUnsorted = undefined;
@@ -83,7 +95,8 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     } else {
       this.range = ranges.all();
     }
-    this.$node.on({
+
+    this.$container.on({
       mouseenter: () => {
         manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.ADD);
       },
@@ -94,23 +107,53 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
         console.log('select', that.id);
         manager.select([that.id], wrapper.idtypes.toSelectOperation(event));
         return false;
+      },
+      mousemove: (event) => {
+        this.mouseMove(event);
+      },
+      mouseup: () => {
+        this.mouseUp();
       }
     });
-/*    this.$node.attr('draggable', true)
-      .on('dragstart', function (event) {
-        return that.onDragStart(event);
-      })
-      .on('drag', function (event) {
-        //console.log('dragging');
-      });*/
+
     this.actSorting = [];
     this.$content.addClass('mode-block');
 
     this.id = this.manager.nextId(this);
   }
 
-  public switchStickToMousePosition():void {
+  private mouseUp() {
+    if(this.dragData.currentlyDragged) {
+      this.dragging = false;
+    }
+  }
 
+  private mouseMove(event:MouseEvent) {
+    if(this.dragData.currentlyDragged) {
+      var pos = this.pos;
+      pos[0] += (event.offsetX - this.dragData.startOffset[0]);
+      pos[1] += (event.offsetY - this.dragData.startOffset[1]);
+      this.pos = pos;
+      //this.dragData.startOffset = [event.offsetX, event.offsetY];
+    }
+  }
+
+  public set dragging(isDragging:boolean) {
+    if(isDragging) {
+      var e = <DragEvent> d3.event;
+      this.dragData.startOffset = [e.offsetX, e.offsetY];
+      this.board.currentlyDragged = this;
+    } else {
+      this.board.currentlyDragged = null;
+    }
+    this.dragData.currentlyDragged = isDragging;
+  }
+
+  public get dragOffset(): [number, number] | boolean {
+    if(this.dragData.currentlyDragged) {
+      return this.dragData.startOffset;
+    }
+    return false;
   }
 
   public rotateBy(degree:number):void {
@@ -121,35 +164,12 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     if (this.vis) {
       this.vis.destroy();
     }
-    this.$node.remove();
+    this.$container.remove();
     this.manager.remove(this);
   };
 
   public get data() {
     return this._data;
-  }
-
-  public onDragStart(event) {
-    var e = event.originalEvent;
-    e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
-    var data = this._data;
-    e.dataTransfer.setData('text/plain', data.desc.name);
-    e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
-    e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
-      block: this.id,
-      offsetX : e.offsetX,
-      offsetY : e.offsetY,
-      layerX : e.layerX,
-      layerY : e.layerY
-    }));
-    //encode the id in the mime type
-    var p = JSON.stringify(data.persist());
-    e.dataTransfer.setData('application/caleydo-data-item', p);
-    e.dataTransfer.setData('application/caleydo-data-item-' +p, p);
-    this.board.currentlyDragged = data;
-    //backup the current position
-    this.$node.css('opacity', '0.5');
-    this.$node.css('filter', 'alpha(opacity=50)');
   }
 
   public setRangeImpl (value) {
@@ -282,15 +302,15 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
   }
 
   public get pos():[number, number] {
-    var p = this.$node.position();
+    var p = this.$container.position();
     return [p.left, p.top];
   }
 
-  public set pos(value) {
-    var bak = this.pos;
-    this.$node.css('left', value[0] + 'px');
-    this.$node.css('top', value[1] + 'px');
-    this.fire('change.pos', value, bak);
+  public set pos(value:[number, number]) {
+    var bak = this.$node.position();
+    this.$container.css('left', value[0] + 'px');
+    this.$container.css('top', value[1] + 'px');
+    this.fire('change.pos', value, [bak.left, bak.top]);
   }
 
   public moveBy(xdelta, ydelta) {

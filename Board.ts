@@ -11,10 +11,10 @@ import range = require('../caleydo_core/range');
 export class Board {
   private content:Element;
   private links:links.LinkContainer;
-  private $node;
+  public $node;
 
   private blocks : {
-    currentlyDragged:blocks.Block<blockDecorator.BlockDecorator>;
+    currentlyDragged; //untyped because of generic block definition
     manager:idtypes.ObjectManager<blocks.Block<blockDecorator.BlockDecorator>>;
   };
 
@@ -22,47 +22,49 @@ export class Board {
     var that = this;
     this.content = node;
     this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'],
-      {filter: (a:blocks.Block<blockDecorator.BlockDecorator>, b:blocks.Block<blockDecorator.BlockDecorator>) => {
-        console.log("check block occlusion");
-        var retval = { val : true};
+      {
+        filter: (a: blocks.Block<blockDecorator.BlockDecorator>, b: blocks.Block<blockDecorator.BlockDecorator>) => {
+          console.log("check block occlusion");
+          var retval = {val: true};
 
-        this.blocks.manager.forEach(function(block) {
-          var a = this[0];
-          var b = this[1];
-          var retval = this[2];
+          this.blocks.manager.forEach(function (block) {
+            var a = this[0];
+            var b = this[1];
+            var retval = this[2];
 
-          if(!retval.val) {
-            return;
-          }
-
-          if(block.id !== a.id && block.id !== b.id) {
-            var leftelempos = b.$node[0].offsetLeft;
-            var rightelempos = a.$node[0].offsetLeft;
-            if(a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
-               leftelempos = a.$node[0].offsetLeft;
-               rightelempos = b.$node[0].offsetLeft;
+            if (!retval.val) {
+              return;
             }
 
-            if(leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
-              retval.val = false;
-            }
-          }
+            if (block.id !== a.id && block.id !== b.id) {
+              var leftelempos = b.$node[0].offsetLeft;
+              var rightelempos = a.$node[0].offsetLeft;
+              if (a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
+                leftelempos = a.$node[0].offsetLeft;
+                rightelempos = b.$node[0].offsetLeft;
+              }
 
-        }, [a,b,retval]);
-        return retval.val;
-      }});
+              if (leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
+                retval.val = false;
+              }
+            }
+
+          }, [a, b, retval]);
+          return retval.val;
+        }
+      });
 
     this.blocks = {
-      currentlyDragged: <blocks.Block<blockDecorator.BlockDecorator>>null,
+      currentlyDragged: null,
       manager: new idtypes.ObjectManager<blocks.Block<blockDecorator.BlockDecorator>>('block', 'Block')
     };
 
     this.blocks.manager.on('select', function (event, type) {
       that.blocks.manager.forEach(function (block) {
-        block.$node.removeClass('caleydo-select-' + type);
+        block.$container.removeClass('caleydo-select-' + type);
       });
       that.blocks.manager.selectedObjects(type).forEach(function (block) {
-        block.$node.addClass('caleydo-select-' + type);
+        block.$container.addClass('caleydo-select-' + type);
       });
     });
     this.blocks.manager.on('add', function (event, id, block) {
@@ -80,35 +82,54 @@ export class Board {
     });
 
     //dnd operation
-    this.$node
-      .on('drop', () => {
-        return this.drop();
-      })
-      .on('dragenter', () => {
-        return this.dragEnter();
-      })
-      .on('dragover', () => {
-        return this.dragOver();
-      })
-      .on('dragleave', () => {
-        return this.dragLeave();
-      })
-      .on('mousemove', () => {
-        return this.mouseMove();
-      });
-
+    this.$node.on({
+      'drop': () => {
+        this.drop();
+      },
+      'dragenter': () => {
+        this.dragEnter();
+      },
+      'dragover': () => {
+        this.dragOver();
+      },
+      'dragleave': () => {
+        this.dragLeave();
+      },
+      'mousemove': () => {
+        this.mouseMove();
+      },
+      'mouseup': () => {
+        this.mouseUp();
+      }
+    });
   }
 
-  public set currentlyDragged(block: blocks.Block<blockDecorator.BlockDecorator>) {
+  public set currentlyDragged(block) {
     this.blocks.currentlyDragged = block;
   }
 
-  public get currentlyDragged(): blocks.Block<blockDecorator.BlockDecorator>  {
+  public get currentlyDragged() {
     return this.blocks.currentlyDragged;
   }
 
-  private mouseMove() {
+  private mouseUp() {
+    if(null !== this.blocks.currentlyDragged) {
+      this.blocks.currentlyDragged.dragging = false;
 
+    }
+  }
+
+  private mouseMove() {
+    if(null !== this.blocks.currentlyDragged) {
+      var e = <MouseEvent> d3.event;
+      var coords = [e.offsetX, e.offsetY];
+      var blockOffset = this.blocks.currentlyDragged.dragOffset;
+      if(false !== blockOffset) {
+        coords[0] -= blockOffset[0];
+        coords[1] -= blockOffset[1];
+      }
+      this.blocks.currentlyDragged.pos = coords;
+    }
   }
 
   private dragEnter() {
@@ -137,22 +158,6 @@ export class Board {
     console.log('drop');
     var e = <DragEvent> d3.event;
     e.preventDefault();
-    //internal move
-    if (wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
-      var info = JSON.parse(e.dataTransfer.getData('application/caleydo-domino-dndinfo'));
-      var block = this.blocks.manager.byId(+info.block);
-      if (wrapper.C.copyDnD(e)) { //create a copy
-        //CLUE CMD
-        block = blocks.createBlock(block.data, this.content, this, this.blocks.manager);
-      }
-      //CLUE CMD
-
-      block.pos = [e.offsetX - info.offsetX, e.offsetY - info.offsetY];//[e.layerX, e.layerY];
-      block.$node.css('opacity', '1');
-
-      this.currentlyDragged = null;
-      return false;
-    }
     //data move
     if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item')) {
       var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
@@ -170,18 +175,20 @@ export class Board {
     e.preventDefault(); // prevent the default action (scroll / move caret)
     var dxy:[number,number] = [0,0];
 
+    var amount = e.ctrlKey ? 15 : 5;
+
     switch(e.which) {
       case 37: // left
-        dxy[0] = -5;
+        dxy[0] -= amount;
         break;
       case 38: // up
-        dxy[1] = -5;
+        dxy[1] -= amount;
         break;
       case 39: // right
-        dxy[0] = 5;
+        dxy[0] = amount;
         break;
       case 40: // down
-        dxy[1] = 5;
+        dxy[1] = amount;
         break;
       default:
         return; // exit this handler for other keys

@@ -39,23 +39,28 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
     var Block = (function (_super) {
         __extends(Block, _super);
         function Block(data, parent, board, decorator, manager) {
+            var _this = this;
             _super.call(this);
             this.decorator = decorator;
             this.manager = manager;
             this.actSorting = [];
-            this.sticksToMouse = false;
             this.rotationAngle = 0;
+            this.dragData = {
+                startOffset: [0, 0],
+                currentlyDragged: false
+            };
             events.EventHandler.call(this);
             this.decorator.decoratedObject = this;
             this._data = data;
             this.parent = parent;
             this.board = board;
-            this.$node = $('<div>').appendTo(parent).addClass('block');
+            this.$container = $('<div>').appendTo(parent).addClass('blockContainer');
+            this.decorator.decorateHeader(this.$container);
+            this.$node = $('<div>').appendTo(this.$container).addClass('block');
             d3.select(this.$node[0]).datum(data); //magic variable within d3
             //CLUE CMD
             this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
             this.propagate(this.zoom, 'zoom');
-            this.decorator.decorateHeader();
             this.$content = $('<div>').appendTo(this.$node);
             var that = this;
             this.rangeUnsorted = undefined;
@@ -67,7 +72,7 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             else {
                 this.range = ranges.all();
             }
-            this.$node.on({
+            this.$container.on({
                 mouseenter: function () {
                     manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.ADD);
                 },
@@ -78,28 +83,63 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
                     console.log('select', that.id);
                     manager.select([that.id], wrapper.idtypes.toSelectOperation(event));
                     return false;
+                },
+                mousemove: function (event) {
+                    _this.mouseMove(event);
+                },
+                mouseup: function () {
+                    _this.mouseUp();
                 }
             });
-            /*    this.$node.attr('draggable', true)
-                  .on('dragstart', function (event) {
-                    return that.onDragStart(event);
-                  })
-                  .on('drag', function (event) {
-                    //console.log('dragging');
-                  });*/
             this.actSorting = [];
             this.$content.addClass('mode-block');
             this.id = this.manager.nextId(this);
         }
-        Block.prototype.switchStickToMousePosition = function () {
+        Block.prototype.mouseUp = function () {
+            if (this.dragData.currentlyDragged) {
+                this.dragging = false;
+            }
         };
+        Block.prototype.mouseMove = function (event) {
+            if (this.dragData.currentlyDragged) {
+                var pos = this.pos;
+                pos[0] += (event.offsetX - this.dragData.startOffset[0]);
+                pos[1] += (event.offsetY - this.dragData.startOffset[1]);
+                this.pos = pos;
+            }
+        };
+        Object.defineProperty(Block.prototype, "dragging", {
+            set: function (isDragging) {
+                if (isDragging) {
+                    var e = d3.event;
+                    this.dragData.startOffset = [e.offsetX, e.offsetY];
+                    this.board.currentlyDragged = this;
+                }
+                else {
+                    this.board.currentlyDragged = null;
+                }
+                this.dragData.currentlyDragged = isDragging;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Block.prototype, "dragOffset", {
+            get: function () {
+                if (this.dragData.currentlyDragged) {
+                    return this.dragData.startOffset;
+                }
+                return false;
+            },
+            enumerable: true,
+            configurable: true
+        });
         Block.prototype.rotateBy = function (degree) {
         };
         Block.prototype.destroy = function () {
             if (this.vis) {
                 this.vis.destroy();
             }
-            this.$node.remove();
+            this.$container.remove();
             this.manager.remove(this);
         };
         ;
@@ -110,28 +150,6 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             enumerable: true,
             configurable: true
         });
-        Block.prototype.onDragStart = function (event) {
-            var e = event.originalEvent;
-            e.dataTransfer.effectAllowed = 'copyMove'; //none, copy, copyLink, copyMove, link, linkMove, move, all
-            var data = this._data;
-            e.dataTransfer.setData('text/plain', data.desc.name);
-            e.dataTransfer.setData('application/json', JSON.stringify(data.desc));
-            e.dataTransfer.setData('application/caleydo-domino-dndinfo', JSON.stringify({
-                block: this.id,
-                offsetX: e.offsetX,
-                offsetY: e.offsetY,
-                layerX: e.layerX,
-                layerY: e.layerY
-            }));
-            //encode the id in the mime type
-            var p = JSON.stringify(data.persist());
-            e.dataTransfer.setData('application/caleydo-data-item', p);
-            e.dataTransfer.setData('application/caleydo-data-item-' + p, p);
-            this.board.currentlyDragged = data;
-            //backup the current position
-            this.$node.css('opacity', '0.5');
-            this.$node.css('filter', 'alpha(opacity=50)');
-        };
         Block.prototype.setRangeImpl = function (value) {
             var bak = this._range;
             this._range = value || ranges.all();
@@ -266,14 +284,14 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
         });
         Object.defineProperty(Block.prototype, "pos", {
             get: function () {
-                var p = this.$node.position();
+                var p = this.$container.position();
                 return [p.left, p.top];
             },
             set: function (value) {
-                var bak = this.pos;
-                this.$node.css('left', value[0] + 'px');
-                this.$node.css('top', value[1] + 'px');
-                this.fire('change.pos', value, bak);
+                var bak = this.$node.position();
+                this.$container.css('left', value[0] + 'px');
+                this.$container.css('top', value[1] + 'px');
+                this.fire('change.pos', value, [bak.left, bak.top]);
             },
             enumerable: true,
             configurable: true
