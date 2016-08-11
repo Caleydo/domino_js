@@ -6,91 +6,47 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
-define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/multiform', '../caleydo_core/behavior'], function (require, exports, $, d3, wrapper, multiform, behaviors) {
+define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../caleydo_core/multiform', '../caleydo_core/behavior', './BlockDecorator'], function (require, exports, $, d3, wrapper, multiform, behaviors, blockDecorator) {
     "use strict";
-    var idtypes = wrapper.idtypes, C = wrapper.C, events = wrapper.events, ranges = wrapper.ranges, geom = wrapper.geom;
-    exports.manager = new idtypes.ObjectManager('block', 'Block');
-    var mode = 'block'; //block, select, band
-    //CLUE CMD
-    function switchMode(m) {
-        if (m === mode) {
-            return false;
-        }
-        var bak = mode;
-        mode = m;
-        events.fire('change.mode', m, bak);
-        exports.manager.forEach(function (block) {
-            block.switchMode(m);
-        });
-        return true;
-    }
-    exports.switchMode = switchMode;
-    ;
-    function getMode() {
-        return mode;
-    }
-    exports.getMode = getMode;
-    ;
-    exports.manager.on('select', function (event, type) {
-        exports.manager.forEach(function (block) {
-            block.$node.removeClass('caleydo-select-' + type);
-        });
-        exports.manager.selectedObjects(type).forEach(function (block) {
-            block.$node.addClass('caleydo-select-' + type);
-        });
-    });
-    function byId(id) {
-        return exports.manager.byId(id);
-    }
-    exports.byId = byId;
-    ;
-    function areBlocksInLineOfSight(a, b) {
-        console.log("check block occlusion");
-        var retval = { val: true };
-        exports.manager.forEach(function (block) {
-            var a = this[0];
-            var b = this[1];
-            var retval = this[2];
-            if (!retval.val) {
-                return;
-            }
-            if (block.id !== a.id && block.id !== b.id) {
-                var leftelempos = b.$node[0].offsetLeft;
-                var rightelempos = a.$node[0].offsetLeft;
-                if (a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
-                    leftelempos = a.$node[0].offsetLeft;
-                    rightelempos = b.$node[0].offsetLeft;
-                }
-                if (leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
-                    retval.val = false;
-                }
-            }
-        }, [a, b, retval]);
-        return retval.val;
-    }
-    exports.areBlocksInLineOfSight = areBlocksInLineOfSight;
-    ;
+    var events = wrapper.events, ranges = wrapper.ranges;
     /**
-     * Creates a block at position (x,y) and adds it to the manager
+     * Creates a block at position (x,y)
      * @param data
      * @param parent
      * @param board
      * @param pos
      * @returns {Block}
      */
-    function createBlockAt(data, parent, board, pos) {
-        var block = new Block(data, parent, board);
+    function createBlockAt(data, parent, board, pos, manager) {
+        var block = createBlock(data, parent, board, manager);
         block.pos = pos;
-        block.id = exports.manager.nextId(block);
         return block;
     }
     exports.createBlockAt = createBlockAt;
+    /**
+     * Creates a block without positioning, uses the standard block decorator
+     * @param data
+     * @param parent
+     * @param board
+     * @param pos
+     * @returns {Block}
+     */
+    function createBlock(data, parent, board, manager) {
+        var block = new Block(data, parent, board, new blockDecorator.BlockDecorator(), manager);
+        return block;
+    }
+    exports.createBlock = createBlock;
     var Block = (function (_super) {
         __extends(Block, _super);
-        function Block(data, parent, board) {
+        function Block(data, parent, board, decorator, manager) {
             _super.call(this);
+            this.decorator = decorator;
+            this.manager = manager;
             this.actSorting = [];
+            this.sticksToMouse = false;
+            this.rotationAngle = 0;
             events.EventHandler.call(this);
+            this.decorator.decoratedObject = this;
             this._data = data;
             this.parent = parent;
             this.board = board;
@@ -99,6 +55,7 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             //CLUE CMD
             this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
             this.propagate(this.zoom, 'zoom');
+            this.decorator.decorateHeader();
             this.$content = $('<div>').appendTo(this.$node);
             var that = this;
             this.rangeUnsorted = undefined;
@@ -112,36 +69,38 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             }
             this.$node.on({
                 mouseenter: function () {
-                    exports.manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.ADD);
+                    manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.ADD);
                 },
                 mouseleave: function () {
-                    exports.manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.REMOVE);
+                    manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.REMOVE);
                 },
                 click: function (event) {
-                    if (mode !== 'select') {
-                        console.log('select', that.id);
-                        exports.manager.select([that.id], idtypes.toSelectOperation(event));
-                    }
+                    console.log('select', that.id);
+                    manager.select([that.id], wrapper.idtypes.toSelectOperation(event));
                     return false;
                 }
             });
-            this.$node.attr('draggable', true)
-                .on('dragstart', function (event) {
-                return that.onDragStart(event);
-            })
-                .on('drag', function (event) {
-                //console.log('dragging');
-            });
+            /*    this.$node.attr('draggable', true)
+                  .on('dragstart', function (event) {
+                    return that.onDragStart(event);
+                  })
+                  .on('drag', function (event) {
+                    //console.log('dragging');
+                  });*/
             this.actSorting = [];
-            this.switchMode(mode);
-            //this.id = manager.nextId(this);
+            this.$content.addClass('mode-block');
+            this.id = this.manager.nextId(this);
         }
+        Block.prototype.switchStickToMousePosition = function () {
+        };
+        Block.prototype.rotateBy = function (degree) {
+        };
         Block.prototype.destroy = function () {
             if (this.vis) {
                 this.vis.destroy();
             }
             this.$node.remove();
-            exports.manager.remove(this);
+            this.manager.remove(this);
         };
         ;
         Object.defineProperty(Block.prototype, "data", {
@@ -170,21 +129,8 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             e.dataTransfer.setData('application/caleydo-data-item-' + p, p);
             this.board.currentlyDragged = data;
             //backup the current position
-            this.startpos = this.pos;
             this.$node.css('opacity', '0.5');
             this.$node.css('filter', 'alpha(opacity=50)');
-        };
-        Block.prototype.switchMode = function (m) {
-            switch (m) {
-                case 'block':
-                    this.$content.addClass('mode-block');
-                    this.$node.attr('draggable', true);
-                    break;
-                case 'select':
-                    this.$content.removeClass('mode-block');
-                    this.$node.attr('draggable', null);
-                    break;
-            }
         };
         Block.prototype.setRangeImpl = function (value) {
             var bak = this._range;
@@ -237,39 +183,39 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
             get: function () {
                 var p = this.pos;
                 var s = this.size;
-                return geom.rect(p[0], p[1], s[0], s[1]);
+                return wrapper.geom.rect(p[0], p[1], s[0], s[1]);
             },
             enumerable: true,
             configurable: true
         });
         Block.prototype.locate = function () {
             var vis = this.vis, that = this;
-            if (!vis || !C.isFunction(vis.locate)) {
+            if (!vis || !wrapper.C.isFunction(vis.locate)) {
                 return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
             }
-            return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
+            return vis.locate.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
                 var p = that.pos;
                 if (Array.isArray(r)) {
                     return r.map(function (loc) {
-                        return loc ? geom.wrap(loc).shift(p) : loc;
+                        return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
                     });
                 }
-                return r ? geom.wrap(r).shift(p) : r;
+                return r ? wrapper.geom.wrap(r).shift(p) : r;
             });
         };
         Block.prototype.locateById = function () {
             var vis = this.vis, that = this;
-            if (!vis || !C.isFunction(vis.locateById)) {
+            if (!vis || !wrapper.C.isFunction(vis.locateById)) {
                 return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
             }
-            return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
+            return vis.locateById.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
                 var p = that.pos;
                 if (Array.isArray(r)) {
                     return r.map(function (loc) {
-                        return loc ? geom.wrap(loc).shift(p) : loc;
+                        return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
                     });
                 }
-                return r ? geom.wrap(r).shift(p) : r;
+                return r ? wrapper.geom.wrap(r).shift(p) : r;
             });
         };
         ;
@@ -356,166 +302,6 @@ define(["require", "exports", 'jquery', 'd3', '../caleydo_core/wrapper', '../cal
         return Block;
     }(events.EventHandler));
     exports.Block = Block;
-    var LinearBlockBlock = (function () {
-        function LinearBlockBlock(block, idtype) {
-            this._block = block;
-            this._sorting = NaN;
-            this.dim = this._block.idtypes.indexOf(idtype);
-        }
-        Object.defineProperty(LinearBlockBlock.prototype, "block", {
-            get: function () {
-                return this.block;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LinearBlockBlock.prototype, "sorting", {
-            get: function () {
-                return this._sorting;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LinearBlockBlock.prototype, "isSorted", {
-            get: function () {
-                return !isNaN(this._sorting);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(LinearBlockBlock.prototype, "isIncreasing", {
-            get: function () {
-                return !isNaN(this._sorting) && this._sorting > 0;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        LinearBlockBlock.prototype.sort = function () {
-            return this._block.sort(this.dim, this.isIncreasing ? 'asc' : 'desc');
-        };
-        LinearBlockBlock.prototype.toCompareFunc = function () {
-            return toCompareFunc(this._block.data.desc, this.isIncreasing ? 'asc' : 'desc');
-        };
-        ;
-        Object.defineProperty(LinearBlockBlock.prototype, "range", {
-            get: function () {
-                return this._block.range.dim(this.dim);
-            },
-            set: function (value) {
-                var r = this._block.range.dims.slice();
-                r[this.dim] = value;
-                this._block.setRangeImpl(ranges.list(r));
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return LinearBlockBlock;
-    }());
-    exports.LinearBlockBlock = LinearBlockBlock;
-    var LinearBlock = (function () {
-        function LinearBlock(block, idtype) {
-            this.blocks = [new LinearBlockBlock(block, idtype)];
-            this.idtype = idtype;
-            this.update();
-        }
-        LinearBlock.prototype.push = function (block) {
-            this.blocks.push(new LinearBlockBlock(block, this.idtype));
-            this.update();
-        };
-        ;
-        LinearBlock.prototype.pushLeft = function (block) {
-            this.blocks.unshift(new LinearBlockBlock(block, this.idtype));
-            this.update();
-        };
-        ;
-        Object.defineProperty(LinearBlock.prototype, "length", {
-            get: function () {
-                return this.blocks.length;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        LinearBlock.prototype.indexOf = function (block) {
-            var idx = -1;
-            for (var _i = 0, _a = this.blocks; _i < _a.length; _i++) {
-                var elem = _a[_i];
-                idx++;
-                if (elem.block === block) {
-                    break;
-                }
-            }
-            return (0 <= idx && idx < this.blocks.length ? idx : -1);
-        };
-        ;
-        LinearBlock.prototype.contains = function (block) {
-            return this.indexOf(block) >= 0;
-        };
-        ;
-        LinearBlock.prototype.sortOrder = function () {
-            var r = this.blocks.filter(function (b) {
-                return !isNaN(b.sorting);
-            });
-            r = r.sort(function (a, b) {
-                return Math.abs(a.sorting) - Math.abs(b.sorting);
-            });
-            return r;
-        };
-        ;
-        LinearBlock.prototype.sortBy = function (block) {
-            var i = this.indexOf(block);
-            if (i < 0) {
-                return false;
-            }
-            var b = this.blocks[i];
-            var s = this.sortOrder();
-            if (isNaN(b.sorting)) {
-                b.sorting = 1; //increasing at position 0
-                //shift by 1
-                s.forEach(shiftSorting(+1));
-            }
-            else if (b.sorting > 0) {
-                b.sorting = -b.sorting; //swap order
-            }
-            else {
-                i = Math.abs(b.sorting) - 1;
-                b.sorting = NaN;
-                s.slice(i + 1).forEach(shiftSorting(-1)); //shift to the left
-            }
-            this.update();
-            return true;
-        };
-        LinearBlock.prototype.remove = function (block) {
-            var i = this.indexOf(block);
-            var b = this.blocks.splice(i, 1)[0];
-            if (!isNaN(b.sorting)) {
-                var s = this.sortOrder();
-                i = Math.abs(b.sorting) - 1;
-                //as already removed from sortOrder
-                s.slice(i).forEach(shiftSorting(-1));
-            }
-        };
-        LinearBlock.prototype.update = function () {
-            var s = this.sortOrder();
-            var active = s[0].range;
-            var cmps = s.map(function (b) { return b.toCompareFunc(); });
-            return Promise.all(s.map(function (b) { return b.block.data(); })).then(function (datas) {
-                var sorted = active.sort(function (a, b) {
-                    var i, j;
-                    for (i = 0; i < cmps.length; ++i) {
-                        j = cmps[i](a, b, datas[i]);
-                        if (j !== 0) {
-                            return j;
-                        }
-                    }
-                    return 0;
-                });
-                s.forEach(function (b) { b.range = sorted; });
-            });
-        };
-        ;
-        return LinearBlock;
-    }());
-    exports.LinearBlock = LinearBlock;
     function guessInitial(desc) {
         if (desc.type === 'matrix') {
             return 'caleydo-vis-heatmap';

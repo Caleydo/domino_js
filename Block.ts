@@ -8,94 +8,40 @@ import wrapper = require('../caleydo_core/wrapper');
 import multiform = require('../caleydo_core/multiform');
 import behaviors = require('../caleydo_core/behavior');
 import board = require('./Board');
-import datatypes = require('../caleydo_core/datatype');
+import blockDecorator = require('./BlockDecorator');
+import idtypes = require('../caleydo_core/idtype');
 
-var idtypes = wrapper.idtypes,
-  C = wrapper.C,
-  events = wrapper.events,
-  ranges  = wrapper.ranges,
-  geom = wrapper.geom;
-
-export const manager =  new idtypes.ObjectManager<Block>('block', 'Block');
-var mode = 'block'; //block, select, band
-
-//CLUE CMD
-export function switchMode (m):any {
-  if (m === mode) {
-    return false;
-  }
-  var bak = mode;
-  mode = m;
-  events.fire('change.mode', m, bak);
-  manager.forEach(function (block) {
-    block.switchMode(m);
-  });
-  return true;
-};
-
-export function getMode ():any {
-  return mode;
-};
-
-manager.on('select', function (event, type) {
-  manager.forEach(function (block) {
-    block.$node.removeClass('caleydo-select-' + type);
-  });
-  manager.selectedObjects(type).forEach(function (block) {
-    block.$node.addClass('caleydo-select-' + type);
-  });
-});
-
-export function byId(id) {
-  return manager.byId(id);
-};
-
-export function areBlocksInLineOfSight(a:Block, b:Block) {
-  console.log("check block occlusion");
-  var retval = { val : true};
-
-  manager.forEach(function(block) {
-    var a = this[0];
-    var b = this[1];
-    var retval = this[2];
-
-    if(!retval.val) {
-      return;
-    }
-
-    if(block.id !== a.id && block.id !== b.id) {
-      var leftelempos = b.$node[0].offsetLeft;
-      var rightelempos = a.$node[0].offsetLeft;
-      if(a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
-         leftelempos = a.$node[0].offsetLeft;
-         rightelempos = b.$node[0].offsetLeft;
-      }
-
-      if(leftelempos < block.$node[0].offsetLeft && block.$node[0].offsetLeft < rightelempos) {
-        retval.val = false;
-      }
-    }
-
-  }, [a,b,retval]);
-  return retval.val;
-};
+var events = wrapper.events,
+  ranges  = wrapper.ranges;
 
 /**
- * Creates a block at position (x,y) and adds it to the manager
+ * Creates a block at position (x,y)
  * @param data
  * @param parent
  * @param board
  * @param pos
  * @returns {Block}
  */
-export function createBlockAt(data, parent:Element, board:board.Board, pos:[number, number]) {
-  var block = new Block(data, parent, board);
+export function createBlockAt(data, parent:Element, board:board.Board, pos:[number, number], manager) {
+  var block = createBlock(data, parent, board, manager);
   block.pos = pos;
-  block.id = manager.nextId(block);
   return block;
 }
 
-export class Block extends events.EventHandler {
+/**
+ * Creates a block without positioning, uses the standard block decorator
+ * @param data
+ * @param parent
+ * @param board
+ * @param pos
+ * @returns {Block}
+ */
+export function createBlock(data, parent:Element, board:board.Board, manager) {
+  var block = new Block<blockDecorator.BlockDecorator>(data, parent, board, new blockDecorator.BlockDecorator(), manager);
+  return block;
+}
+
+export class Block<Decorator extends blockDecorator.IObjectDecorator> extends events.EventHandler implements blockDecorator.IDecorableObject {
   public $node;
   public id;
 
@@ -105,16 +51,19 @@ export class Block extends events.EventHandler {
   private zoom:behaviors.ZoomBehavior;
   private $content;
   private actSorting = [];
-  private startpos;
   private rangeUnsorted;
 
   private _range;
   private vis;
   private visMeta;
 
-  constructor(data, parent:Element, board:board.Board) {
+  private sticksToMouse:boolean = false;
+  private rotationAngle:number = 0;
+
+  constructor(data, parent:Element, board:board.Board, private decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
     super();
     events.EventHandler.call(this);
+    this.decorator.decoratedObject = this;
     this._data = data;
     this.parent = parent;
     this.board = board;
@@ -123,6 +72,7 @@ export class Block extends events.EventHandler {
     //CLUE CMD
     this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
+    this.decorator.decorateHeader();
     this.$content = $('<div>').appendTo(this.$node);
     var that = this;
     this.rangeUnsorted = undefined;
@@ -135,29 +85,36 @@ export class Block extends events.EventHandler {
     }
     this.$node.on({
       mouseenter: () => {
-        manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.ADD);
+        manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.ADD);
       },
       mouseleave: () => {
-        manager.select(idtypes.hoverSelectionType, [that.id], idtypes.SelectOperation.REMOVE);
+        manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.REMOVE);
       },
       click: function (event) {
-        if (mode !== 'select') {
-          console.log('select', that.id);
-          manager.select([that.id], idtypes.toSelectOperation(event));
-        }
+        console.log('select', that.id);
+        manager.select([that.id], wrapper.idtypes.toSelectOperation(event));
         return false;
       }
     });
-    this.$node.attr('draggable', true)
+/*    this.$node.attr('draggable', true)
       .on('dragstart', function (event) {
         return that.onDragStart(event);
       })
       .on('drag', function (event) {
         //console.log('dragging');
-      });
+      });*/
     this.actSorting = [];
-    this.switchMode(mode);
-    //this.id = manager.nextId(this);
+    this.$content.addClass('mode-block');
+
+    this.id = this.manager.nextId(this);
+  }
+
+  public switchStickToMousePosition():void {
+
+  }
+
+  public rotateBy(degree:number):void {
+
   }
 
   public destroy() {
@@ -165,7 +122,7 @@ export class Block extends events.EventHandler {
       this.vis.destroy();
     }
     this.$node.remove();
-    manager.remove(this);
+    this.manager.remove(this);
   };
 
   public get data() {
@@ -191,22 +148,8 @@ export class Block extends events.EventHandler {
     e.dataTransfer.setData('application/caleydo-data-item-' +p, p);
     this.board.currentlyDragged = data;
     //backup the current position
-    this.startpos = this.pos;
     this.$node.css('opacity', '0.5');
     this.$node.css('filter', 'alpha(opacity=50)');
-  }
-
-  public switchMode(m) {
-    switch (m) {
-    case 'block':
-      this.$content.addClass('mode-block');
-      this.$node.attr('draggable', true);
-      break;
-    case 'select':
-      this.$content.removeClass('mode-block');
-      this.$node.attr('draggable', null);
-      break;
-    }
   }
 
   public setRangeImpl (value) {
@@ -257,38 +200,38 @@ export class Block extends events.EventHandler {
   public get location() {
     var p = this.pos;
     var s = this.size;
-    return geom.rect(p[0], p[1], s[0], s[1]);
+    return wrapper.geom.rect(p[0], p[1], s[0], s[1]);
   }
 
   public locate() {
     var vis = this.vis, that = this;
-    if (!vis || !C.isFunction(vis.locate)) {
+    if (!vis || !wrapper.C.isFunction(vis.locate)) {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
-    return vis.locate.apply(vis, C.argList(arguments)).then(function (r) {
+    return vis.locate.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
       var p = that.pos;
       if (Array.isArray(r)) {
         return r.map(function (loc) {
-          return loc ? geom.wrap(loc).shift(p) : loc;
+          return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
         });
       }
-      return r ? geom.wrap(r).shift(p) : r;
+      return r ? wrapper.geom.wrap(r).shift(p) : r;
     });
   }
 
   public locateById () {
     var vis = this.vis, that = this;
-    if (!vis || !C.isFunction(vis.locateById)) {
+    if (!vis || !wrapper.C.isFunction(vis.locateById)) {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
-    return vis.locateById.apply(vis, C.argList(arguments)).then(function (r) {
+    return vis.locateById.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
       var p = that.pos;
       if (Array.isArray(r)) {
         return r.map(function (loc) {
-          return loc ? geom.wrap(loc).shift(p) : loc;
+          return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
         });
       }
-      return r ? geom.wrap(r).shift(p) : r;
+      return r ? wrapper.geom.wrap(r).shift(p) : r;
     });
   };
 
@@ -372,155 +315,6 @@ export class Block extends events.EventHandler {
   }
 }
 
-
-export class LinearBlockBlock{
-  private _block:Block;
-  private _sorting:number;
-  private dim;
-
-  constructor(block:Block, idtype) {
-    this._block = block;
-    this._sorting = NaN;
-    this.dim = this._block.idtypes.indexOf(idtype);
-  }
-
-  public get block():Block {
-    return this.block;
-  }
-
-  public get sorting():number {
-    return this._sorting;
-  }
-
-  public get isSorted():boolean {
-    return !isNaN(this._sorting);
-  }
-
-  public get isIncreasing():boolean {
-    return !isNaN(this._sorting) && this._sorting > 0;
-  }
-
-  public sort() {
-    return this._block.sort(this.dim, this.isIncreasing ? 'asc' : 'desc');
-  }
-
-  public toCompareFunc() {
-    return toCompareFunc(this._block.data.desc, this.isIncreasing ? 'asc' : 'desc');
-  };
-
-  public get range() {
-      return this._block.range.dim(this.dim);
-  }
-
-  public set range(value) {
-      var r = this._block.range.dims.slice();
-      r[this.dim] = value;
-      this._block.setRangeImpl(ranges.list(r));
-  }
-}
-
-export class LinearBlock {
-  private blocks:LinearBlockBlock[];
-  private idtype;
-
-  constructor(block:Block, idtype) {
-    this.blocks = [ new LinearBlockBlock(block, idtype) ];
-    this.idtype = idtype;
-    this.update();
-  }
-
-  public push(block:Block):void {
-    this.blocks.push(new LinearBlockBlock(block, this.idtype));
-    this.update();
-  };
-
-  public pushLeft(block:Block):void {
-    this.blocks.unshift(new LinearBlockBlock(block, this.idtype));
-    this.update();
-  };
-
-  public get length():number {
-      return this.blocks.length;
-  }
-
-  public indexOf(block:Block):number {
-    var idx = -1;
-    for(var elem of this.blocks) {
-      idx++;
-      if(elem.block === block) {
-        break;
-      }
-    }
-    return (0 <= idx && idx < this.blocks.length ? idx : -1);
-  };
-
-  public contains(block):boolean {
-    return this.indexOf(block) >= 0;
-  };
-
-  public sortOrder():any  {
-    var r = this.blocks.filter(function (b) {
-      return !isNaN(b.sorting);
-    });
-    r = r.sort(function (a, b) {
-      return Math.abs(a.sorting) - Math.abs(b.sorting);
-    });
-    return r;
-  };
-
-  public sortBy(block:Block):boolean {
-    var i = this.indexOf(block);
-    if (i < 0) { //not part of sorting
-      return false;
-    }
-    var b = this.blocks[i];
-    var s = this.sortOrder();
-    if (isNaN(b.sorting)) { //not yet sorted
-      b.sorting = 1; //increasing at position 0
-      //shift by 1
-      s.forEach(shiftSorting(+1));
-    } else if (b.sorting > 0) { //already sorted by increasing
-      b.sorting = -b.sorting; //swap order
-    } else { //already sorting decreasing
-      i = Math.abs(b.sorting) - 1;
-      b.sorting = NaN;
-      s.slice(i + 1).forEach(shiftSorting(-1)); //shift to the left
-    }
-    this.update();
-    return true;
-  }
-
-  public remove(block) {
-    var i = this.indexOf(block);
-    var b = this.blocks.splice(i, 1)[0];
-    if (!isNaN(b.sorting)) {
-      var s = this.sortOrder();
-      i = Math.abs(b.sorting) - 1;
-      //as already removed from sortOrder
-      s.slice(i).forEach(shiftSorting(-1));
-    }
-  }
-
-  public update() {
-    var s = this.sortOrder();
-    var active = s[0].range;
-    var cmps = s.map(function (b) { return b.toCompareFunc(); });
-
-    return Promise.all(s.map(function (b) {  return b.block.data(); })).then(function (datas) {
-      var sorted = active.sort(function (a, b) {
-        var i, j;
-        for (i = 0; i < cmps.length; ++i) {
-          j = cmps[i](a, b, datas[i]);
-          if (j !== 0) {
-            return j;
-          }
-        }
-        return 0;
-      });
-      s.forEach(function (b) {b.range = sorted; });
-    });
-  };
-}
 
 function guessInitial(desc):any {
   if (desc.type === 'matrix') {
