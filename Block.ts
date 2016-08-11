@@ -65,7 +65,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
 
   private rotationAngle:number = 0;
 
-  constructor(data, parent:Element, board:board.Board, private decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
+  constructor(data, parent:Element, board:board.Board, public decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
     super();
     this.dragData = {
       startOffset:[0,0],

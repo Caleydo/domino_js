@@ -61,10 +61,12 @@ export class Board {
 
     this.blocks.manager.on('select', function (event, type) {
       that.blocks.manager.forEach(function (block) {
-        block.$container.removeClass('caleydo-select-' + type);
+        block.decorator.$header.classed('caleydo-select-' + type, false);
+        block.$node.removeClass('caleydo-select-' + type);
       });
       that.blocks.manager.selectedObjects(type).forEach(function (block) {
-        block.$container.addClass('caleydo-select-' + type);
+        block.decorator.$header.classed('caleydo-select-' + type, true);
+        block.$node.addClass('caleydo-select-' + type);
       });
     });
     this.blocks.manager.on('add', function (event, id, block) {

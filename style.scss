@@ -77,28 +77,65 @@ svg {
     border: 1px solid #d58512;
   }
 
-  .block {
+  .blockContainer {
     position: absolute;
     width: auto;
     height: auto;
 
-    &.caleydo-select-selected {
-      border: 1px solid $select-color;
-      background: none;
-    }
-    &.caleydo-select-hovered {
-      border: 1px solid $hover-color;
-      background: none;
+    .block {
+      &.caleydo-select-selected {
+        border: none;
+        background: none;
+      }
+      &.caleydo-select-hovered {
+        border: none;
+        background: none;
+      }
+
+      .mode-block {
+        pointer-events: none;
+      }
+      &.ui-state-disabled {
+        opacity: 1;
+      }
     }
 
-    .mode-block {
-      pointer-events: none;
-    }
+    .toolbar {
 
-    &.ui-state-disabled {
-      opacity: 1;
+      display:block;
+      height: 20px;
+      width: 100px;
+      padding-top: 1px;
+      border: 1px solid black;
+      border-radius: 3px;
+
+      &.caleydo-select-selected {
+        border: 1px solid $select-color;
+        background: none;
+      }
+      &.caleydo-select-hovered {
+        border: 1px solid $hover-color;
+        background: none;
+      }
+
+      i {
+        display:block;
+        width: 20px;
+        height: 20px;
+        //margin-left: 2px;
+        float: left;
+        text-align: center;
+        font-weight: bold;
+        cursor: pointer;
+
+        &.fa-arrows {
+
+          cursor: move;
+        }
+      }
     }
   }
+
 
   .selection-clearer {
     width: 100%;

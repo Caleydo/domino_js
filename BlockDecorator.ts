@@ -19,29 +19,25 @@ export interface IDecorableObject {
 }
 
 export interface IObjectDecorator {
+  $header:d3.Selection<any>;
   decoratedObject:IDecorableObject;
   decorateHeader(container:JQuery):void;
 }
 
 export class BlockDecorator implements IObjectDecorator {
-  private style:string = 'display:block; width: 20px; height: 20px; margin-left: 5px; float:left; font-align:center; cursor: pointer;';
-
-  private $header:d3.Selection<any>;
+  public $header:d3.Selection<any>;
   public decoratedObject:IDecorableObject;
 
   public decorateHeader(container:JQuery):void {
     this.$header = d3.select(container[0]).append('div')
-      .attr('class', 'toolbar')
-      .attr('style', 'height: 10px;');
+      .attr('class', 'toolbar');
 
     multiform.addIconVisChooser(<Element>this.$header.node());
     this.$header.append('i').attr('class', 'fa fa-close')
       .on('click', ()=> {
         this.decoratedObject.destroy();
-      })
-      .attr('style', this.style)
-      .text('X');
-    this.$header.append('i').attr('class', 'fa fa-move')
+      });
+    this.$header.append('i').attr('class', 'fa fa-arrows')
       .on('mousedown', () => {
         var e = <MouseEvent> d3.event;
         e.preventDefault();
@@ -51,28 +47,22 @@ export class BlockDecorator implements IObjectDecorator {
         var e = <MouseEvent> d3.event;
         e.preventDefault();
         this.decoratedObject.dragging = false;
-      })
-      .attr('style', this.style + 'cursor: move;')
-      .text('M');
-    this.$header.append('i').attr('class', 'fa fa-zoom-in')
+      });
+    this.$header.append('i').attr('class', 'fa fa-plus-square')
       .on('click', () => {
         var e = <MouseEvent> d3.event;
         e.preventDefault();
         var amount = 1;
         this.decoratedObject.zoom.zoom(amount,amount);
-      })
-      .attr('style', this.style)
-      .text('+');
+      });
 
-    this.$header.append('i').attr('class', 'fa fa-zoom-out')
+    this.$header.append('i').attr('class', 'fa fa-minus-square')
       .on('click', () => {
         var e = <MouseEvent> d3.event;
         e.preventDefault();
         var amount = -1;
         this.decoratedObject.zoom.zoom(amount,amount);
-      })
-      .attr('style', this.style)
-      .text('-');
+      });
   }
 
 }
