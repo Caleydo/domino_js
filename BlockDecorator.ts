@@ -40,7 +40,7 @@ export class BlockDecorator implements IObjectDecorator {
         this.decoratedObject.destroy();
       })
       .attr('style', this.style)
-      .text("X");
+      .text('X');
     this.$header.append('i').attr('class', 'fa fa-move')
       .on('mousedown', () => {
         var e = <MouseEvent> d3.event;
@@ -52,8 +52,8 @@ export class BlockDecorator implements IObjectDecorator {
         e.preventDefault();
         this.decoratedObject.dragging = false;
       })
-      .attr('style', this.style + "cursor: move;")
-      .text("M");
+      .attr('style', this.style + 'cursor: move;')
+      .text('M');
     this.$header.append('i').attr('class', 'fa fa-zoom-in')
       .on('click', () => {
         var e = <MouseEvent> d3.event;

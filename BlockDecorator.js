@@ -18,7 +18,7 @@ define(["require", "exports", 'd3', '../caleydo_core/multiform'], function (requ
                 _this.decoratedObject.destroy();
             })
                 .attr('style', this.style)
-                .text("X");
+                .text('X');
             this.$header.append('i').attr('class', 'fa fa-move')
                 .on('mousedown', function () {
                 var e = d3.event;
@@ -30,8 +30,8 @@ define(["require", "exports", 'd3', '../caleydo_core/multiform'], function (requ
                 e.preventDefault();
                 _this.decoratedObject.dragging = false;
             })
-                .attr('style', this.style + "cursor: move;")
-                .text("M");
+                .attr('style', this.style + 'cursor: move;')
+                .text('M');
             this.$header.append('i').attr('class', 'fa fa-zoom-in')
                 .on('click', function () {
                 var e = d3.event;
