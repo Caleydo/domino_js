@@ -5,14 +5,13 @@
 import views = require('../caleydo_core/layout_view');
 import data = require('../caleydo_core/data');
 import $ = require('jquery');
-import selectionInfo = require('../caleydo_d3/selectioninfo');
 import boards = require('./Board');
 import blockBrowser = require('./Blockbrowser');
 
 class Domino extends views.AView {
   private board:boards.Board;
   private browser:blockBrowser.Blockbrowser;
-  private info:selectionInfo.SelectionInfo;
+  //private info:selectionInfo.SelectionInfo;
 
   constructor() {
     super();
@@ -21,7 +20,7 @@ class Domino extends views.AView {
     //this.info = selectionInfo.create(document.getElementById('selectioninfo'));
     this.browser = new blockBrowser.Blockbrowser(document.getElementById('blockbrowser'));
 
-    $(document).keydown((e:KeyboardEvent) => {this.board.digestKeyCode(e)});
+    $(document).keydown((e:KeyboardEvent) => { this.board.digestKeyCode(e); });
   }
 
   public execute():void {

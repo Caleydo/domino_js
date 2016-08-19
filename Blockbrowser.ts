@@ -60,7 +60,7 @@ export class Blockbrowser {
 
 export class BlockbrowserItem {
   private _parentBrowser:Blockbrowser;
-  private $node:d3.Selection<any>;
+  //private $node:d3.Selection<any>;
   private name:string;
   private type:string;
   private idTypes:string[] = [];

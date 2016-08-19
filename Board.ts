@@ -24,7 +24,7 @@ export class Board {
     this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'],
       {
         filter: (a: blocks.Block<blockDecorator.BlockDecorator>, b: blocks.Block<blockDecorator.BlockDecorator>) => {
-          console.log("check block occlusion");
+          console.log('check block occlusion');
           var retval = {val: true};
 
           this.blocks.manager.forEach(function (block) {

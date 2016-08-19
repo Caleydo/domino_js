@@ -63,7 +63,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     currentlyDragged:boolean;
   };
 
-  private rotationAngle:number = 0;
+  //private rotationAngle:number = 0;
 
   constructor(data, parent:Element, board:board.Board, public decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
     super();
@@ -157,7 +157,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
   }
 
   public rotateBy(degree:number):void {
-
+    // TODO
   }
 
   public destroy() {
@@ -371,8 +371,8 @@ function toCompareFunc(desc, cmp) {
   }
 }
 
-function shiftSorting(factor) {
+/*function shiftSorting(factor) {
   return function (s) {
     s.sorting += s.sorting < 0 ? -1 * factor : +1 * factor;
   };
-}
+}*/
