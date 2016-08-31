@@ -3,6 +3,8 @@ Caleydo Domino ![Caleydo Web Application](https://img.shields.io/badge/Caleydo%2
 
 Caleydo Domino is a novel multiform visualization technique for effectively representing subsets and the relationships between them. By providing comprehensive tools to arrange, combine, and extract subsets, Domino allows users to create both common visualization techniques and advanced visualizations tailored to specific use cases.
 
+See the [project homepage](http://domino.caleydo.org/) for further information.
+
 Installation
 ------------
 
