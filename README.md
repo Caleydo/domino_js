@@ -5,6 +5,8 @@ Caleydo Domino is a novel multiform visualization technique for effectively repr
 
 See the [project homepage](http://domino.caleydo.org/) for further information.
 
+A [demonstration](http://playground.caleydo.org/domino_js/) is available in the Caleydo Playground.
+
 Installation
 ------------
 
