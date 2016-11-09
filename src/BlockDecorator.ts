@@ -2,9 +2,9 @@
  * Created by Tobias Appl on 8/11/2016.
  */
 
-import d3 = require('d3');
-import multiform = require('../caleydo_core/multiform');
-import behavior = require('../caleydo_core/behavior');
+import * as d3 from 'd3';
+import * as multiform from 'phovea_core/src/multiform';
+import * as behavior from 'phovea_core/src/behavior';
 /**
  * This interface is used to make classes decorable by the BlockDecorator
  */

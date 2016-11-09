@@ -8,10 +8,10 @@
 /// <amd-dependency path="css!/bower_components/bootstrap/dist/css/bootstrap" />
 
 /// <amd-dependency path="font-awesome" />
-/// <amd-dependency path="css!../caleydo_bootstrap_fontawesome/style.css" />
+/// <amd-dependency path="css!phovea_bootstrap_fontawesome/style.css" /src/>
 /// <amd-dependency path="css!./style.css"/>
 
-import domino = require('./Domino');
+import * as domino from './Domino';
 
 var dominoApplication = domino.create();
 dominoApplication.execute();

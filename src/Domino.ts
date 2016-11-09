@@ -2,11 +2,11 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import views = require('../caleydo_core/layout_view');
-import data = require('../caleydo_core/data');
-import $ = require('jquery');
-import boards = require('./Board');
-import blockBrowser = require('./Blockbrowser');
+import * as views from 'phovea_core/src/layout_view';
+import * as data from 'phovea_core/src/data';
+import * as $ from 'jquery';
+import * as boards from './Board';
+import * as blockBrowser from './Blockbrowser';
 
 class Domino extends views.AView {
   private board:boards.Board;

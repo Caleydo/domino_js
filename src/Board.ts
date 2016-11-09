@@ -1,12 +1,12 @@
 /* Created by Tobias Appl on 7/29/2016. */
 
-import d3 = require('d3');
-import wrapper = require('../caleydo_core/wrapper');
-import idtypes = require('../caleydo_core/idtype');
-import links = require('../caleydo_d3/link');
-import blocks = require('./Block');
-import blockDecorator = require('./BlockDecorator');
-import range = require('../caleydo_core/range');
+import * as d3 from 'd3';
+import * as wrapper from 'phovea_core/src/wrapper';
+import * as idtypes from 'phovea_core/src/idtype';
+import * as links from 'phovea_d3/src/link';
+import * as blocks from './Block';
+import * as blockDecorator from './BlockDecorator';
+import * as range from 'phovea_core/src/range';
 
 export class Board {
   private content:Element;

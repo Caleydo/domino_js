@@ -2,8 +2,8 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import $ = require('jquery');
-import d3 = require('d3');
+import * as $ from 'jquery';
+import * as d3 from 'd3';
 
 export class Blockbrowser {
   private elemTemplate = `

@@ -2,14 +2,14 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import $ = require('jquery');
-import d3 = require('d3');
-import wrapper = require('../caleydo_core/wrapper');
-import multiform = require('../caleydo_core/multiform');
-import behaviors = require('../caleydo_core/behavior');
-import board = require('./Board');
-import blockDecorator = require('./BlockDecorator');
-import idtypes = require('../caleydo_core/idtype');
+import * as $ from 'jquery';
+import * as d3 from 'd3';
+import * as wrapper from 'phovea_core/src/wrapper';
+import * as multiform from 'phovea_core/src/multiform';
+import * as behaviors from 'phovea_core/src/behavior';
+import * as board from './Board';
+import * as blockDecorator from './BlockDecorator';
+import * as idtypes from 'phovea_core/src/idtype';
 
 var events = wrapper.events,
   ranges  = wrapper.ranges;
