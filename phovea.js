@@ -8,7 +8,7 @@
 module.exports = function(registry) {
   //registry.push('extension-type', 'extension-id', function() { return System.import('./src/extension_impl'); }, {});
   // generator-phovea:begin
-  registry.push('app', 'domino_js', function() { return System.import('./src/'); }, {
+  registry.push('app', 'domino_js', null, {
   'name': 'Domino.js'
  });
   // generator-phovea:end
