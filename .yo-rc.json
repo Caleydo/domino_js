@@ -21,7 +21,7 @@
     "sextensions": [],
     "libraries": [
       "d3",
-      "bootstrap"
+      "jquery"
     ],
     "unknown": {
       "requirements": [],

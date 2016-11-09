@@ -59,7 +59,7 @@ svg {
 }
 
 #board {
-  background-image: url(assets/icons/icon.svg);
+  background-image: url(./assets/icons/icon.svg);
   background-position: left top;
   background-size: 10%;
   background-repeat: no-repeat;
@@ -85,11 +85,11 @@ svg {
     height: auto;
 
     .block {
-      &.caleydo-select-selected {
+      &.phovea-select-selected {
         border: none;
         background: none;
       }
-      &.caleydo-select-hovered {
+      &.phovea-select-hovered {
         border: none;
         background: none;
       }
@@ -110,11 +110,11 @@ svg {
       border: 1px solid black;
       border-radius: 3px;
 
-      &.caleydo-select-selected {
+      &.phovea-select-selected {
         border: 1px solid $select-color;
         background: none;
       }
-      &.caleydo-select-hovered {
+      &.phovea-select-hovered {
         border: 1px solid $hover-color;
         background: none;
       }
@@ -159,10 +159,10 @@ svg {
         stroke-width: 1;
         stroke-opacity: 0.9;
 
-        &.caleydo-select-selected {
+        &.phovea-select-selected {
           stroke: $select-color;
         }
-        &.caleydo-select-hovered {
+        &.phovea-select-hovered {
           stroke: $hover-color;
         }
       }
@@ -174,10 +174,10 @@ svg {
         fill: black;
         opacity: 0.2;
 
-        &.caleydo-select-selected {
+        &.phovea-select-selected {
           fill: $select-color;
         }
-        &.caleydo-select-hovered {
+        &.phovea-select-hovered {
           fill: $hover-color;
         }
       }
@@ -247,13 +247,13 @@ svg {
   }
 }
 
-.caleydo-select-selected {
+.phovea-select-selected {
   //html variant
   border: 1px solid $select-color;
   background-color: $select-color;
 }
 
-svg .caleydo-select-selected {
+svg .phovea-select-selected {
   //svg variant
   stroke: $select-color;
   stroke-width: 1px;

@@ -7,8 +7,8 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width">
 
-    <link rel="stylesheet" href="style.css">
-    <script src="/caleydo_web.js"></script>
+    <link href="./style.css" rel="stylesheet" type="text/css">
+    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
   </head>
 	<body>
     <!--aside id="sidebar">
@@ -24,5 +24,16 @@
       <footer id="blockbrowser">
       </footer>
     </div>
-	</body>
+<script>
+  (function() {
+    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    if (!isChrome) {
+      alert('This application was designed to be used in Google Chrome.\nRunning the application in other browsers might result in performance issues or other misbehavior.');
+    }
+  })();
+</script>
+<script src="./common.js"></script>
+<script src="./app.js"></script>
+
+</body>
 </html>

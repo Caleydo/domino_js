@@ -3,13 +3,12 @@
  */
 
 // Determine the order of css files manually
-
-// HACK! because <amd-dependency path="bootstrap" /> is loaded after all the other stylesheets and not before (as declared)
-/// <amd-dependency path="css!/bower_components/bootstrap/dist/css/bootstrap" />
-
-/// <amd-dependency path="font-awesome" />
-/// <amd-dependency path="css!phovea_bootstrap_fontawesome/style.css" /src/>
-/// <amd-dependency path="css!./style.css"/>
+import 'file?name=index.html!extract!html!./index.html';
+import 'file?name=404.html!./404.html';
+import 'file?name=robots.txt!./robots.txt';
+import 'phovea_bootstrap_fontawesome/src/_font-awesome';
+import 'phovea_bootstrap_fontawesome/src/_bootstrap';
+import './style.scss';
 
 import * as domino from './Domino';
 
