@@ -1,5 +1,4 @@
 {
-  "main": "build/domino_js.js",
   "files": [
     "src",
     "index.js",
@@ -69,7 +68,9 @@
     "@types/d3": "^3.5.36",
     "d3": "^3.5.17",
     "@types/bootstrap": "^3.3.32",
-    "bootstrap-sass": "^3.3.7"
+    "bootstrap-sass": "^3.3.7",
+    "@types/jquery": "^2.0.33",
+    "jquery": "^3.1.1"
   },
   "name": "domino_js",
   "description": "Domino Phovea application",
@@ -82,10 +83,11 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/phovea/domino_js/issues"
+    "url": "https://github.com/caleydo/domino_js/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/phovea/domino_js.git"
-  }
+    "url": "https://github.com/caleydo/domino_js.git"
+  },
+  "main": "build/domino_js.js"
 }

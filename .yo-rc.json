@@ -3,7 +3,7 @@
     "type": "app",
     "name": "domino_js",
     "author": "The Caleydo Team",
-    "githubAccount": "phovea",
+    "githubAccount": "caleydo",
     "modules": [
       "phovea_core",
       "phovea_vis"
@@ -37,8 +37,7 @@
     },
     "libraryExternals": [
       "d3",
-      "bootstrap",
-      "bootstrap-sass",
+      "jquery",
       "d3"
     ],
     "ignores": [],

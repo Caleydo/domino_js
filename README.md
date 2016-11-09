@@ -7,7 +7,7 @@ Installation
 ------------
 
 ```
-git clone https://github.com/phovea/domino_js.git
+git clone https://github.com/caleydo/domino_js.git
 cd domino_js
 npm install
 ```
@@ -38,7 +38,7 @@ This repository is part of **[Phovea](http://phovea.caleydo.org/)**, a platform 
 [phovea-url]: https://phovea.caleydo.org
 [npm-image]: https://badge.fury.io/js/domino_js.svg
 [npm-url]: https://npmjs.org/package/domino_js
-[travis-image]: https://travis-ci.org/phovea/domino_js.svg?branch=master
-[travis-url]: https://travis-ci.org/phovea/domino_js
-[daviddm-image]: https://david-dm.org/phovea/domino_js.svg?theme=shields.io
-[daviddm-url]: https://david-dm.org/phovea/domino_js
+[travis-image]: https://travis-ci.org/caleydo/domino_js.svg?branch=master
+[travis-url]: https://travis-ci.org/caleydo/domino_js
+[daviddm-image]: https://david-dm.org/caleydo/domino_js.svg?theme=shields.io
+[daviddm-url]: https://david-dm.org/caleydo/domino_js
