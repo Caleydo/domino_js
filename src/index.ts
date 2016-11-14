@@ -3,9 +3,9 @@
  */
 
 // Determine the order of css files manually
-import 'file?name=index.html!extract!html!./index.html';
-import 'file?name=404.html!./404.html';
-import 'file?name=robots.txt!./robots.txt';
+import 'file-loader?name=index.html!extract-loader!html-loader!./index.html';
+import 'file-loader?name=404.html!./404.html';
+import 'file-loader?name=robots.txt!./robots.txt';
 import 'phovea_bootstrap_fontawesome/src/_font-awesome';
 import 'phovea_bootstrap_fontawesome/src/_bootstrap';
 import './style.scss';
