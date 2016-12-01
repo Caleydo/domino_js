@@ -61,12 +61,12 @@ export class Board {
 
     this.blocks.manager.on('select', function (event, type) {
       that.blocks.manager.forEach(function (block) {
-        block.decorator.$header.classed('caleydo-select-' + type, false);
-        block.$node.removeClass('caleydo-select-' + type);
+        block.decorator.$header.classed('phovea-select-' + type, false);
+        block.$node.removeClass('phovea-select-' + type);
       });
       that.blocks.manager.selectedObjects(type).forEach(function (block) {
-        block.decorator.$header.classed('caleydo-select-' + type, true);
-        block.$node.addClass('caleydo-select-' + type);
+        block.decorator.$header.classed('phovea-select-' + type, true);
+        block.$node.addClass('phovea-select-' + type);
       });
     });
     this.blocks.manager.on('add', function (event, id, block) {
@@ -137,7 +137,7 @@ export class Board {
   private dragEnter() {
     console.log('dragEnter');
     var e = <DragEvent> d3.event;
-    if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       return false;
     }
   }
@@ -146,7 +146,7 @@ export class Board {
     console.log('dragOver');
     var e = <DragEvent> d3.event;
     this.links.update();
-    if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item') || wrapper.C.hasDnDType(e, 'application/caleydo-domino-dndinfo')) {
+    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       e.preventDefault();
       return false;
     }
@@ -161,8 +161,8 @@ export class Board {
     var e = <DragEvent> d3.event;
     e.preventDefault();
     //data move
-    if (wrapper.C.hasDnDType(e, 'application/caleydo-data-item')) {
-      var id = JSON.parse(e.dataTransfer.getData('application/caleydo-data-item'));
+    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item')) {
+      var id = JSON.parse(e.dataTransfer.getData('application/phovea-data-item'));
       var that = this;
       wrapper.data.get(id).then((d) => {
         //CLUE CMD

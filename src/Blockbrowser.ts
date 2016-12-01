@@ -96,9 +96,9 @@ export class BlockbrowserItem {
     e.dataTransfer.setData('text/plain', this.item.desc.name);
     e.dataTransfer.setData('application/json', JSON.stringify(this.item.desc));
     var p = JSON.stringify(this.item.persist());
-    e.dataTransfer.setData('application/caleydo-data-item', p);
+    e.dataTransfer.setData('application/phovea-data-item', p);
     //encode the id in the mime type
-    e.dataTransfer.setData('application/caleydo-data-item-' + p, p);
+    e.dataTransfer.setData('application/phovea-data-item-' + p, p);
   }
 }
 

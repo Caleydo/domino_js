@@ -338,13 +338,13 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
 
 function guessInitial(desc):any {
   if (desc.type === 'matrix') {
-    return 'caleydo-vis-heatmap';
+    return 'phovea-vis-heatmap';
   }
   if (desc.type === 'vector' && desc.value.type === 'categorical') {
-    return 'caleydo-vis-mosaic';
+    return 'phovea-vis-mosaic';
   }
   if (desc.type === 'vector' && desc.value.type.match('real|int')) {
-    return 'caleydo-vis-axis';
+    return 'phovea-vis-axis';
   }
   return -1;
 }
