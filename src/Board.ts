@@ -19,26 +19,26 @@ export class Board {
   };
 
   constructor(node:Element) {
-    var that = this;
+    const that = this;
     this.content = node;
     this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'],
       {
         filter: (a: blocks.Block<blockDecorator.BlockDecorator>, b: blocks.Block<blockDecorator.BlockDecorator>) => {
           console.log('check block occlusion');
-          var retval = {val: true};
+          const retval = {val: true};
 
           this.blocks.manager.forEach(function (block) {
-            var a = this[0];
-            var b = this[1];
-            var retval = this[2];
+            const a = this[0];
+            const b = this[1];
+            const retval = this[2];
 
             if (!retval.val) {
               return;
             }
 
             if (block.id !== a.id && block.id !== b.id) {
-              var leftelempos = b.$node[0].offsetLeft;
-              var rightelempos = a.$node[0].offsetLeft;
+              const leftelempos = b.$node[0].offsetLeft;
+              const rightelempos = a.$node[0].offsetLeft;
               if (a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
                 leftelempos = a.$node[0].offsetLeft;
                 rightelempos = b.$node[0].offsetLeft;
@@ -123,9 +123,9 @@ export class Board {
 
   private mouseMove() {
     if(null !== this.blocks.currentlyDragged) {
-      var e = <MouseEvent> d3.event;
-      var coords = [e.offsetX, e.offsetY];
-      var blockOffset = this.blocks.currentlyDragged.dragOffset;
+      const e = <MouseEvent> d3.event;
+      const coords = [e.offsetX, e.offsetY];
+      const blockOffset = this.blocks.currentlyDragged.dragOffset;
       if(false !== blockOffset) {
         coords[0] -= blockOffset[0];
         coords[1] -= blockOffset[1];
@@ -136,7 +136,7 @@ export class Board {
 
   private dragEnter() {
     console.log('dragEnter');
-    var e = <DragEvent> d3.event;
+    const e = <DragEvent> d3.event;
     if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       return false;
     }
@@ -144,7 +144,7 @@ export class Board {
 
   private dragOver() {
     console.log('dragOver');
-    var e = <DragEvent> d3.event;
+    const e = <DragEvent> d3.event;
     this.links.update();
     if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       e.preventDefault();
@@ -158,12 +158,12 @@ export class Board {
 
   private drop() {
     console.log('drop');
-    var e = <DragEvent> d3.event;
+    const e = <DragEvent> d3.event;
     e.preventDefault();
     //data move
     if (wrapper.C.hasDnDType(e, 'application/phovea-data-item')) {
-      var id = JSON.parse(e.dataTransfer.getData('application/phovea-data-item'));
-      var that = this;
+      const id = JSON.parse(e.dataTransfer.getData('application/phovea-data-item'));
+      const that = this;
       wrapper.data.get(id).then((d) => {
         //CLUE CMD
         blocks.createBlockAt(d, that.content, that, [e.offsetX, e.offsetY], this.blocks.manager);
@@ -175,9 +175,9 @@ export class Board {
 
   public digestKeyCode(e:KeyboardEvent) {
     e.preventDefault(); // prevent the default action (scroll / move caret)
-    var dxy:[number,number] = [0,0];
+    let dxy:[number,number] = [0,0];
 
-    var amount = e.ctrlKey ? 15 : 5;
+    const amount = e.ctrlKey ? 15 : 5;
 
     switch(e.which) {
       case 37: // left
@@ -196,8 +196,8 @@ export class Board {
         return; // exit this handler for other keys
     }
 
-    var selected_blocks:range.Range = this.blocks.manager.selections();
-    selected_blocks.dim(0).asList().forEach((id) => {
+    const selected_blocks = this.blocks.manager.selections();
+    selected_blocks.dim(0).forEach((id) => {
       this.blocks.manager.byId(id).moveBy(dxy[0], dxy[1]);
     });
   }

@@ -10,8 +10,8 @@ import 'phovea_ui/src/_font-awesome';
 import 'phovea_ui/src/_bootstrap';
 import './style.scss';
 
-import * as domino from './Domino';
+import {create} from './Domino';
 
-var dominoApplication = domino.create();
+const dominoApplication = create();
 dominoApplication.execute();
 

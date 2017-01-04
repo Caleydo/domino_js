@@ -2,17 +2,17 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import * as $ from 'jquery';
-import * as d3 from 'd3';
-import * as wrapper from 'phovea_core/src/wrapper';
-import * as multiform from 'phovea_core/src/multiform';
-import * as behaviors from 'phovea_core/src/behavior';
-import * as board from './Board';
-import * as blockDecorator from './BlockDecorator';
-import * as idtypes from 'phovea_core/src/idtype';
-
-var events = wrapper.events,
-  ranges  = wrapper.ranges;
+import {} from 'jquery';
+import {Selection, select, ascending, descending} from 'd3';
+import {} from 'phovea_core/src/multiform';
+import {ZoomBehavior, ZoomLogic} from 'phovea_core/src/behavior';
+import {EventHandler} from 'phovea_core/src/event';
+import {Board} from './Board';
+import {IObjectDecorator, BlockDecorator, IDecorableObject} from './BlockDecorator';
+import {} from 'phovea_core/src/idtype';
+import {VALUE_TYPE_CATEGORICAL, IDataDescription, ICategoricalValueTypeDesc} from "../../phovea_core/src/datatype";
+import {IVectorDataDescription} from "../../phovea_core/src/vector";
+import {IMatrixDataDescription} from "../../phovea_core/src/matrix";
 
 /**
  * Creates a block at position (x,y)
@@ -22,8 +22,8 @@ var events = wrapper.events,
  * @param pos
  * @returns {Block}
  */
-export function createBlockAt(data, parent:Element, board:board.Board, pos:[number, number], manager) {
-  var block = createBlock(data, parent, board, manager);
+export function createBlockAt(data, parent: Element, board: Board, pos: [number, number], manager) {
+  const block = createBlock(data, parent, board, manager);
   block.pos = pos;
   return block;
 }
@@ -36,20 +36,19 @@ export function createBlockAt(data, parent:Element, board:board.Board, pos:[numb
  * @param pos
  * @returns {Block}
  */
-export function createBlock(data, parent:Element, board:board.Board, manager) {
-  var block = new Block<blockDecorator.BlockDecorator>(data, parent, board, new blockDecorator.BlockDecorator(), manager);
-  return block;
+export function createBlock(data, parent: Element, board: Board, manager) {
+  return new Block<BlockDecorator>(data, parent, board, new BlockDecorator(), manager);
 }
 
-export class Block<Decorator extends blockDecorator.IObjectDecorator> extends events.EventHandler implements blockDecorator.IDecorableObject {
-  public $node:JQuery;
-  public $container:JQuery;
+export class Block<Decorator extends IObjectDecorator> extends EventHandler implements IDecorableObject {
+  public $node: JQuery;
+  public $container: JQuery;
   public id;
 
   private _data;
-  private parent:Element;
-  private board:board.Board;
-  public zoom:behaviors.ZoomBehavior;
+  private parent: Element;
+  private board: Board;
+  public zoom: ZoomBehavior;
   private $content;
   private actSorting = [];
   private rangeUnsorted;
@@ -59,20 +58,18 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
   private visMeta;
 
   private dragData: {
-    startOffset:[number, number];
-    currentlyDragged:boolean;
+    startOffset: [number, number];
+    currentlyDragged: boolean;
   };
 
   //private rotationAngle:number = 0;
 
-  constructor(data, parent:Element, board:board.Board, public decorator: Decorator, private manager:idtypes.ObjectManager<Block<Decorator>>) {
+  constructor(data, parent: Element, board: Board, public decorator: Decorator, private manager: idtypes.ObjectManager<Block<Decorator>>) {
     super();
     this.dragData = {
-      startOffset:[0,0],
-      currentlyDragged:false
+      startOffset: [0, 0],
+      currentlyDragged: false
     };
-
-    events.EventHandler.call(this);
     this.decorator.decoratedObject = this;
     this._data = data;
     this.parent = parent;
@@ -83,7 +80,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
 
     d3.select(this.$node[0]).datum(data); //magic variable within d3
     //CLUE CMD
-    this.zoom = new behaviors.ZoomBehavior(this.$node[0], null, null);
+    this.zoom = new ZoomBehavior(this.$node[0], null, null);
     this.propagate(this.zoom, 'zoom');
     this.$content = $('<div>').appendTo(this.$node);
     var that = this;
@@ -123,13 +120,13 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
   }
 
   private mouseUp() {
-    if(this.dragData.currentlyDragged) {
+    if (this.dragData.currentlyDragged) {
       this.dragging = false;
     }
   }
 
-  private mouseMove(event:MouseEvent) {
-    if(this.dragData.currentlyDragged) {
+  private mouseMove(event: MouseEvent) {
+    if (this.dragData.currentlyDragged) {
       var pos = this.pos;
       pos[0] += (event.offsetX - this.dragData.startOffset[0]);
       pos[1] += (event.offsetY - this.dragData.startOffset[1]);
@@ -138,25 +135,25 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     }
   }
 
-  public set dragging(isDragging:boolean) {
-    if(isDragging) {
+  public set dragging(isDragging: boolean) {
+    if (isDragging) {
       var e = <DragEvent> d3.event;
       this.dragData.startOffset = [e.offsetX, e.offsetY];
-      this.board.currentlyDragged = this;
+      this.currentlyDragged = this;
     } else {
-      this.board.currentlyDragged = null;
+      this.currentlyDragged = null;
     }
     this.dragData.currentlyDragged = isDragging;
   }
 
   public get dragOffset(): [number, number] | boolean {
-    if(this.dragData.currentlyDragged) {
+    if (this.dragData.currentlyDragged) {
       return this.dragData.startOffset;
     }
     return false;
   }
 
-  public rotateBy(degree:number):void {
+  public rotateBy(degree: number): void {
     // TODO
   }
 
@@ -172,7 +169,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     return this._data;
   }
 
-  public setRangeImpl (value) {
+  public setRangeImpl(value) {
     var bak = this._range;
     this._range = value || ranges.all();
     var initialVis = guessInitial(this._data.desc);
@@ -182,12 +179,12 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
       this.$content.empty();
     }
     /*this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
-      return data.view(range);
-    }, {
-      initialVis : initialVis
-    });*/
+     return data.view(range);
+     }, {
+     initialVis : initialVis
+     });*/
     this.vis = multiform.create(this._data.view(this._range), this.$content[0], {
-      initialVis : initialVis
+      initialVis: initialVis
     });
     this.visMeta = this.vis.asMetaData;
     this.zoom.v = this.vis;
@@ -239,7 +236,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     });
   }
 
-  public locateById () {
+  public locateById() {
     var vis = this.vis, that = this;
     if (!vis || !wrapper.C.isFunction(vis.locateById)) {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
@@ -255,7 +252,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     });
   };
 
-  public sort(dim,cmp) {
+  public sort(dim, cmp) {
     if (dim > this.ndim) {
       return Promise.resolve(null);
     }
@@ -290,7 +287,9 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     //get data and sort the range and update the range
     //TODO just the needed data
     return this._data._data().then(function (data_) {
-      r[dim] = active.sort(function (a, b) { return cmp(a, b, data_);  });
+      r[dim] = active.sort(function (a, b) {
+        return cmp(a, b, data_);
+      });
       console.log(active.toString(), ' -> ', r[dim].toString());
       that.setRangeImpl(ranges.list(r));
       return that.range;
@@ -301,12 +300,12 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     return this._data.idtypes;
   }
 
-  public get pos():[number, number] {
+  public get pos(): [number, number] {
     var p = this.$container.position();
     return [p.left, p.top];
   }
 
-  public set pos(value:[number, number]) {
+  public set pos(value: [number, number]) {
     var bak = this.$node.position();
     this.$container.css('left', value[0] + 'px');
     this.$container.css('top', value[1] + 'px');
@@ -322,6 +321,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
     function toDelta(factor) {
       return factor * 20;
     }
+
     return this.moveBy(toDelta(xfactor), toDelta(yfactor));
   }
 
@@ -336,7 +336,7 @@ export class Block<Decorator extends blockDecorator.IObjectDecorator> extends ev
 }
 
 
-function guessInitial(desc):any {
+function guessInitial(desc): any {
   if (desc.type === 'matrix') {
     return 'phovea-vis-heatmap';
   }
@@ -349,30 +349,24 @@ function guessInitial(desc):any {
   return -1;
 }
 
-function toCompareFunc(desc, cmp) {
-  cmp = (cmp === 'asc') ? d3.ascending : (cmp === 'desc' ? d3.descending : cmp);
+function toCompareFunc(desc: IVectorDataDescription|IMatrixDataDescription, cmp: 'asc'|'desc'|((a: any, b: any)=>boolean)) {
+  let cmpF = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
 
   switch (desc.value.type) {
-  case 'categorical':
-    var cats = desc.value.categories;
-    return function (a, b, data) {
-      var ac = data[a];
-      var bc = data[b];
-      var ai = cats.indexOf(ac);
-      var bi = cats.indexOf(bc);
-      return cmp(ai, bi);
-    };
-  default:
-    return function (a, b, data) {
-      var ac = data[a];
-      var bc = data[b];
-      return cmp(ac, bc);
-    };
+    case VALUE_TYPE_CATEGORICAL:
+      const cats = (<ICategoricalValueTypeDesc>(desc.value)).categories;
+      return (a, b, data) => {
+        const ac = data[a];
+        const bc = data[b];
+        const ai = cats.indexOf(ac);
+        const bi = cats.indexOf(bc);
+        return cmpF(ai, bi);
+      };
+    default:
+      return (a, b, data) => {
+        const ac = data[a];
+        const bc = data[b];
+        return cmpF(ac, bc);
+      };
   }
 }
-
-/*function shiftSorting(factor) {
-  return function (s) {
-    s.sorting += s.sorting < 0 ? -1 * factor : +1 * factor;
-  };
-}*/
