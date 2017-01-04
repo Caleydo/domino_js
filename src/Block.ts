@@ -2,17 +2,19 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import {} from 'jquery';
-import {Selection, select, ascending, descending} from 'd3';
-import {} from 'phovea_core/src/multiform';
-import {ZoomBehavior, ZoomLogic} from 'phovea_core/src/behavior';
+import * as $ from 'jquery';
+import {select, ascending, descending, event as d3event} from 'd3';
+import {create as createMultiForm} from 'phovea_core/src/multiform';
+import {ZoomBehavior} from 'phovea_core/src/behavior';
 import {EventHandler} from 'phovea_core/src/event';
 import {Board} from './Board';
+import {list as rlist, all, Range} from 'phovea_core/src/range';
+import {wrap, rect} from 'phovea_core/src/geom';
 import {IObjectDecorator, BlockDecorator, IDecorableObject} from './BlockDecorator';
-import {} from 'phovea_core/src/idtype';
-import {VALUE_TYPE_CATEGORICAL, IDataDescription, ICategoricalValueTypeDesc} from "../../phovea_core/src/datatype";
-import {IVectorDataDescription} from "../../phovea_core/src/vector";
-import {IMatrixDataDescription} from "../../phovea_core/src/matrix";
+import {ObjectManager, hoverSelectionType, SelectOperation, toSelectOperation} from 'phovea_core/src/idtype';
+import {VALUE_TYPE_CATEGORICAL, IDataDescription, ICategoricalValueTypeDesc} from 'phovea_core/src/datatype';
+import {IVectorDataDescription} from 'phovea_core/src/vector';
+import {IMatrixDataDescription} from 'phovea_core/src/matrix';
 
 /**
  * Creates a block at position (x,y)
@@ -41,14 +43,14 @@ export function createBlock(data, parent: Element, board: Board, manager) {
 }
 
 export class Block<Decorator extends IObjectDecorator> extends EventHandler implements IDecorableObject {
-  public $node: JQuery;
-  public $container: JQuery;
-  public id;
+  $node: JQuery;
+  $container: JQuery;
+  id;
 
   private _data;
   private parent: Element;
   private board: Board;
-  public zoom: ZoomBehavior;
+  zoom: ZoomBehavior;
   private $content;
   private actSorting = [];
   private rangeUnsorted;
@@ -64,7 +66,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
   //private rotationAngle:number = 0;
 
-  constructor(data, parent: Element, board: Board, public decorator: Decorator, private manager: idtypes.ObjectManager<Block<Decorator>>) {
+  constructor(data, parent: Element, board: Board, public readonly decorator: Decorator, private readonly manager: ObjectManager<Block<Decorator>>) {
     super();
     this.dragData = {
       startOffset: [0, 0],
@@ -78,31 +80,28 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     this.decorator.decorateHeader(this.$container);
     this.$node = $('<div>').appendTo(this.$container).addClass('block');
 
-    d3.select(this.$node[0]).datum(data); //magic variable within d3
-    //CLUE CMD
-    this.zoom = new ZoomBehavior(this.$node[0], null, null);
-    this.propagate(this.zoom, 'zoom');
+    select(this.$node[0]).datum(data); //magic variable within d3
     this.$content = $('<div>').appendTo(this.$node);
-    var that = this;
+    const that = this;
     this.rangeUnsorted = undefined;
     if (data.desc.type === 'vector') {
-      data.groups().then(function (groups) {
-        that.range = ranges.list(groups);
+      data.groups().then((groups) => {
+        this.range = rlist(groups);
       });
     } else {
-      this.range = ranges.all();
+      this.range = all();
     }
 
     this.$container.on({
       mouseenter: () => {
-        manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.ADD);
+        manager.select(hoverSelectionType, [that.id], SelectOperation.ADD);
       },
       mouseleave: () => {
-        manager.select(wrapper.idtypes.hoverSelectionType, [that.id], wrapper.idtypes.SelectOperation.REMOVE);
+        manager.select(hoverSelectionType, [that.id], SelectOperation.REMOVE);
       },
       click: function (event) {
         console.log('select', that.id);
-        manager.select([that.id], wrapper.idtypes.toSelectOperation(event));
+        manager.select([that.id], toSelectOperation(event));
         return false;
       },
       mousemove: (event) => {
@@ -127,7 +126,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
   private mouseMove(event: MouseEvent) {
     if (this.dragData.currentlyDragged) {
-      var pos = this.pos;
+      const pos = this.pos;
       pos[0] += (event.offsetX - this.dragData.startOffset[0]);
       pos[1] += (event.offsetY - this.dragData.startOffset[1]);
       this.pos = pos;
@@ -137,11 +136,8 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
   public set dragging(isDragging: boolean) {
     if (isDragging) {
-      var e = <DragEvent> d3.event;
+      const e = <DragEvent> d3event;
       this.dragData.startOffset = [e.offsetX, e.offsetY];
-      this.currentlyDragged = this;
-    } else {
-      this.currentlyDragged = null;
     }
     this.dragData.currentlyDragged = isDragging;
   }
@@ -169,10 +165,10 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     return this._data;
   }
 
-  public setRangeImpl(value) {
-    var bak = this._range;
-    this._range = value || ranges.all();
-    var initialVis = guessInitial(this._data.desc);
+  public setRangeImpl(value: Range) {
+    const bak = this._range;
+    this._range = value || all();
+    let initialVis = guessInitial(this._data.desc);
     if (this.vis) {
       initialVis = this.vis.actDesc;
       this.vis.destroy();
@@ -183,12 +179,12 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
      }, {
      initialVis : initialVis
      });*/
-    this.vis = multiform.create(this._data.view(this._range), this.$content[0], {
+    this.vis = createMultiForm(this._data.view(this._range), this.$content[0], {
       initialVis: initialVis
     });
     this.visMeta = this.vis.asMetaData;
-    this.zoom.v = this.vis;
-    this.zoom.meta = this.visMeta;
+    this.zoom = new ZoomBehavior(this.$node[0], this.vis, this.visMeta);
+    this.propagate(this.zoom, 'zoom');
     this.fire('change.range', value, bak);
   }
 
@@ -196,8 +192,8 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     return this._range;
   }
 
-  public set range(value) {
-    this._range = value || ranges.all();
+  public set range(value: Range) {
+    this._range = value || all();
     this.rangeUnsorted = value;
     this.setRangeImpl(value);
   }
@@ -215,54 +211,54 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
   }
 
   public get location() {
-    var p = this.pos;
-    var s = this.size;
-    return wrapper.geom.rect(p[0], p[1], s[0], s[1]);
+    const p = this.pos;
+    const s = this.size;
+    return rect(p[0], p[1], s[0], s[1]);
   }
 
   public locate() {
-    var vis = this.vis, that = this;
-    if (!vis || !wrapper.C.isFunction(vis.locate)) {
+    const vis = this.vis, that = this;
+    if (!vis || typeof vis.locate !== 'function') {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
-    return vis.locate.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
-      var p = that.pos;
+    return vis.locate.apply(vis, Array.from(arguments)).then((r) => {
+      const p = that.pos;
       if (Array.isArray(r)) {
         return r.map(function (loc) {
-          return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
+          return loc ? wrap(loc).shift(p) : loc;
         });
       }
-      return r ? wrapper.geom.wrap(r).shift(p) : r;
+      return r ? wrap(r).shift(p) : r;
     });
   }
 
   public locateById() {
-    var vis = this.vis, that = this;
-    if (!vis || !wrapper.C.isFunction(vis.locateById)) {
+    const vis = this.vis, that = this;
+    if (!vis || typeof vis.locateById !== 'function') {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
     }
-    return vis.locateById.apply(vis, wrapper.C.argList(arguments)).then(function (r) {
-      var p = that.pos;
+    return vis.locateById.apply(vis, Array.from(arguments)).then((r)=> {
+      const p = that.pos;
       if (Array.isArray(r)) {
         return r.map(function (loc) {
-          return loc ? wrapper.geom.wrap(loc).shift(p) : loc;
+          return loc ? wrap(loc).shift(p) : loc;
         });
       }
-      return r ? wrapper.geom.wrap(r).shift(p) : r;
+      return r ? wrap(r).shift(p) : r;
     });
   };
 
-  public sort(dim, cmp) {
+  public sort(dim: number, cmp: string) {
     if (dim > this.ndim) {
       return Promise.resolve(null);
     }
-    var r = this.range.dims.slice(); //work on copy
-    var active = r[dim];
-    var that = this;
+    const r = this.range.dims.slice(); //work on copy
+    const active = r[dim];
+    const that = this;
 
     //special 'next' sorting mode
     if (cmp === 'next') {
-      var old = this.actSorting[dim];
+      const old = this.actSorting[dim];
       if (old === 'asc') {
         cmp = 'desc';
       } else if (old === 'desc') {
@@ -276,22 +272,22 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
       this.actSorting[dim] = undefined;
       r[dim] = this.rangeUnsorted.dim(dim);
       console.log(active.toString(), ' -> ', r[dim].toString());
-      this.setRangeImpl(ranges.list(r));
+      this.setRangeImpl(rlist(r));
       return Promise.resolve(this.range);
     }
 
     this.actSorting[dim] = cmp;
 
-    cmp = toCompareFunc(this._data.desc, cmp);
+    const cmpF = toCompareFunc(this._data.desc, <'desc'|'asc'>cmp);
 
     //get data and sort the range and update the range
     //TODO just the needed data
-    return this._data._data().then(function (data_) {
-      r[dim] = active.sort(function (a, b) {
-        return cmp(a, b, data_);
+    return this._data._data().then((data_)=> {
+      r[dim] = active.sort((a, b) => {
+        return cmpF(a, b, data_);
       });
       console.log(active.toString(), ' -> ', r[dim].toString());
-      that.setRangeImpl(ranges.list(r));
+      that.setRangeImpl(rlist(r));
       return that.range;
     });
   }
@@ -301,23 +297,23 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
   }
 
   public get pos(): [number, number] {
-    var p = this.$container.position();
+    const p = this.$container.position();
     return [p.left, p.top];
   }
 
   public set pos(value: [number, number]) {
-    var bak = this.$node.position();
+    const bak = this.$node.position();
     this.$container.css('left', value[0] + 'px');
     this.$container.css('top', value[1] + 'px');
     this.fire('change.pos', value, [bak.left, bak.top]);
   }
 
-  public moveBy(xdelta, ydelta) {
-    var p = this.pos;
+  public moveBy(xdelta: number, ydelta: number) {
+    const p = this.pos;
     this.pos = [p[0] + xdelta, p[1] + ydelta];
   }
 
-  public move(xfactor, yfactor) {
+  public move(xfactor: number, yfactor: number) {
     function toDelta(factor) {
       return factor * 20;
     }
@@ -336,21 +332,21 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 }
 
 
-function guessInitial(desc): any {
+function guessInitial(desc: IDataDescription): string|number {
   if (desc.type === 'matrix') {
     return 'phovea-vis-heatmap';
   }
-  if (desc.type === 'vector' && desc.value.type === 'categorical') {
+  if (desc.type === 'vector' && (<IVectorDataDescription<any>>desc).value.type === VALUE_TYPE_CATEGORICAL) {
     return 'phovea-vis-mosaic';
   }
-  if (desc.type === 'vector' && desc.value.type.match('real|int')) {
+  if (desc.type === 'vector' && (<IVectorDataDescription<any>>desc).value.type.match('real|int')) {
     return 'phovea-vis-axis';
   }
   return -1;
 }
 
-function toCompareFunc(desc: IVectorDataDescription|IMatrixDataDescription, cmp: 'asc'|'desc'|((a: any, b: any)=>boolean)) {
-  let cmpF = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
+function toCompareFunc(desc: IVectorDataDescription<any>|IMatrixDataDescription<any>, cmp: 'asc'|'desc'|((a: any, b: any)=>number)) {
+  let cmpF:(a: any, b: any)=>number = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
 
   switch (desc.value.type) {
     case VALUE_TYPE_CATEGORICAL:

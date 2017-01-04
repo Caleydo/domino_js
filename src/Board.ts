@@ -1,29 +1,29 @@
 /* Created by Tobias Appl on 7/29/2016. */
 
-import * as d3 from 'd3';
-import * as wrapper from 'phovea_core/src/wrapper';
-import * as idtypes from 'phovea_core/src/idtype';
-import * as links from 'phovea_d3/src/link';
-import * as blocks from './Block';
-import * as blockDecorator from './BlockDecorator';
-import * as range from 'phovea_core/src/range';
+import {select, event as d3event} from 'd3';
+import {ObjectManager, clearSelection} from 'phovea_core/src/idtype';
+import {LinkContainer} from 'phovea_d3/src/link';
+import {Block, createBlockAt} from './Block';
+import {BlockDecorator} from './BlockDecorator';
+import {hasDnDType} from 'phovea_core/src';
+import {get as getData} from 'phovea_core/src/data';
 
 export class Board {
   private content:Element;
-  private links:links.LinkContainer;
+  private links:LinkContainer;
   public $node;
 
   private blocks : {
     currentlyDragged; //untyped because of generic block definition
-    manager:idtypes.ObjectManager<blocks.Block<blockDecorator.BlockDecorator>>;
+    manager:ObjectManager<Block<BlockDecorator>>;
   };
 
   constructor(node:Element) {
     const that = this;
     this.content = node;
-    this.links = new links.LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'],
+    this.links = new LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'],
       {
-        filter: (a: blocks.Block<blockDecorator.BlockDecorator>, b: blocks.Block<blockDecorator.BlockDecorator>) => {
+        filter: (a: Block<BlockDecorator>, b: Block<BlockDecorator>) => {
           console.log('check block occlusion');
           const retval = {val: true};
 
@@ -37,8 +37,8 @@ export class Board {
             }
 
             if (block.id !== a.id && block.id !== b.id) {
-              const leftelempos = b.$node[0].offsetLeft;
-              const rightelempos = a.$node[0].offsetLeft;
+              let leftelempos = b.$node[0].offsetLeft;
+              let rightelempos = a.$node[0].offsetLeft;
               if (a.$node[0].offsetLeft < b.$node[0].offsetLeft) {
                 leftelempos = a.$node[0].offsetLeft;
                 rightelempos = b.$node[0].offsetLeft;
@@ -56,7 +56,7 @@ export class Board {
 
     this.blocks = {
       currentlyDragged: null,
-      manager: new idtypes.ObjectManager<blocks.Block<blockDecorator.BlockDecorator>>('block', 'Block')
+      manager: new ObjectManager<Block<BlockDecorator>>('block', 'Block')
     };
 
     this.blocks.manager.on('select', function (event, type) {
@@ -76,11 +76,11 @@ export class Board {
       that.links.remove(block);
     });
 
-    this.$node = d3.select(this.links.node);
+    this.$node = select(this.links.node);
     //clear on click on background
     this.$node.classed('selection-clearer', true).on('click', function () {
       that.blocks.manager.clear();
-      idtypes.clearSelection();
+      clearSelection();
     });
 
     //dnd operation
@@ -123,7 +123,7 @@ export class Board {
 
   private mouseMove() {
     if(null !== this.blocks.currentlyDragged) {
-      const e = <MouseEvent> d3.event;
+      const e = <MouseEvent> d3event;
       const coords = [e.offsetX, e.offsetY];
       const blockOffset = this.blocks.currentlyDragged.dragOffset;
       if(false !== blockOffset) {
@@ -136,17 +136,17 @@ export class Board {
 
   private dragEnter() {
     console.log('dragEnter');
-    const e = <DragEvent> d3.event;
-    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
+    const e = <DragEvent> d3event;
+    if (hasDnDType(e, 'application/phovea-data-item') || hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       return false;
     }
   }
 
   private dragOver() {
     console.log('dragOver');
-    const e = <DragEvent> d3.event;
+    const e = <DragEvent> d3event;
     this.links.update();
-    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item') || wrapper.C.hasDnDType(e, 'application/phovea-domino-dndinfo')) {
+    if (hasDnDType(e, 'application/phovea-data-item') || hasDnDType(e, 'application/phovea-domino-dndinfo')) {
       e.preventDefault();
       return false;
     }
@@ -158,15 +158,15 @@ export class Board {
 
   private drop() {
     console.log('drop');
-    const e = <DragEvent> d3.event;
+    const e = <DragEvent> d3event;
     e.preventDefault();
     //data move
-    if (wrapper.C.hasDnDType(e, 'application/phovea-data-item')) {
+    if (hasDnDType(e, 'application/phovea-data-item')) {
       const id = JSON.parse(e.dataTransfer.getData('application/phovea-data-item'));
       const that = this;
-      wrapper.data.get(id).then((d) => {
+      getData(id).then((d) => {
         //CLUE CMD
-        blocks.createBlockAt(d, that.content, that, [e.offsetX, e.offsetY], this.blocks.manager);
+        createBlockAt(d, that.content, that, [e.offsetX, e.offsetY], this.blocks.manager);
       });
       this.currentlyDragged = null;
       return false;

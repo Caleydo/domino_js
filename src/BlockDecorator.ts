@@ -9,7 +9,7 @@ import {ZoomLogic} from 'phovea_core/src/behavior';
  * This interface is used to make classes decorable by the BlockDecorator
  */
 export interface IDecorableObject {
-  readonly $node: Selection<any>;
+  readonly $node: JQuery;
   pos: [number, number];
   dragging: boolean;
   readonly zoom: ZoomLogic;
