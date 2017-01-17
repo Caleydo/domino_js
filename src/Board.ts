@@ -175,7 +175,7 @@ export class Board {
 
   public digestKeyCode(e:KeyboardEvent) {
     e.preventDefault(); // prevent the default action (scroll / move caret)
-    let dxy:[number,number] = [0,0];
+    const dxy:[number,number] = [0,0];
 
     const amount = e.ctrlKey ? 15 : 5;
 
@@ -196,8 +196,8 @@ export class Board {
         return; // exit this handler for other keys
     }
 
-    const selected_blocks = this.blocks.manager.selections();
-    selected_blocks.dim(0).forEach((id) => {
+    const selectedBlocks = this.blocks.manager.selections();
+    selectedBlocks.dim(0).forEach((id) => {
       this.blocks.manager.byId(id).moveBy(dxy[0], dxy[1]);
     });
   }
