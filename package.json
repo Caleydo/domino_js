@@ -53,8 +53,8 @@
     "prepublish": "npm run build"
   },
   "dependencies": {
-    "phovea_core": "github:phovea/phovea_core#feature_update_dependencies",
-    "phovea_vis": "github:phovea/phovea_vis#feature_update_dependencies",
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_vis": "github:phovea/phovea_vis#develop",
     "@types/d3": "3.5.36",
     "d3": "3.5.17",
     "@types/bootstrap": "^3.3.32",
