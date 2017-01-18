@@ -99,7 +99,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
       mouseleave: () => {
         manager.select(hoverSelectionType, [that.id], SelectOperation.REMOVE);
       },
-      click: function (event) {
+      click: (event) => {
         console.log('select', that.id);
         manager.select([that.id], toSelectOperation(event));
         return false;
@@ -180,7 +180,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
      initialVis : initialVis
      });*/
     this.vis = createMultiForm(this._data.view(this._range), this.$content[0], {
-      initialVis: initialVis
+      initialVis
     });
     this.visMeta = this.vis.asMetaData;
     this.zoom = new ZoomBehavior(this.$node[0], this.vis, this.visMeta);
@@ -282,9 +282,9 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
     //get data and sort the range and update the range
     //TODO just the needed data
-    return this._data._data().then((data_)=> {
+    return this._data._data().then((loadedData)=> {
       r[dim] = active.sort((a, b) => {
-        return cmpF(a, b, data_);
+        return cmpF(a, b, loadedData);
       });
       console.log(active.toString(), ' -> ', r[dim].toString());
       that.setRangeImpl(rlist(r));
@@ -346,7 +346,7 @@ function guessInitial(desc: IDataDescription): string|number {
 }
 
 function toCompareFunc(desc: IVectorDataDescription<any>|IMatrixDataDescription<any>, cmp: 'asc'|'desc'|((a: any, b: any)=>number)) {
-  let cmpF:(a: any, b: any)=>number = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
+  const cmpF:(a: any, b: any)=>number = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
 
   switch (desc.value.type) {
     case VALUE_TYPE_CATEGORICAL:
