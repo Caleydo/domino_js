@@ -1,43 +1,97 @@
 {
   "name": "domino_js",
-  "description": "Domino Caleydo Web application",
-  "version": "0.0.1",
-  "license" : "SEE LICENSE IN LICENSE",
-  "repository": "Caleydo/domino_js",
+  "description": "Domino Phovea application",
   "homepage": "http://www.caleydo.org/tools/domino/",
+  "version": "1.0.0-SNAPSHOT",
+  "author": {
+    "name": "The Caleydo Team",
+    "email": "contact@caleydo.org",
+    "url": "https://caleydo.org"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/caleydo/domino_js/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/caleydo/domino_js.git"
+  },
+  "private": true,
+  "files": [
+    "src",
+    "index.js",
+    "phovea.js",
+    "phovea_registry.js",
+    "build"
+  ],
+  "engines": {
+    "npm": ">= 3",
+    "node": ">= 6",
+    "iojs": ">= 3"
+  },
+  "scripts": {
+    "compile": "tsc",
+    "lint": "tslint -c tslint.json src/**.ts tests/**.ts",
+    "docs": "typedoc --options typedoc.json src/**.ts",
+    "prebuild": "node -e \"process.exit(process.env.PHOVEA_SKIP_TESTS === undefined?1:0)\" || npm run test",
+    "pretest": "npm run compile",
+    "test": "karma start",
+    "posttest": "npm run lint",
+    "test:watch": "karma start --autoWatch=true --singleRun=false",
+    "build:dev": "webpack",
+    "build": "webpack --env prod",
+    "start": "webpack-dev-server --inline",
+    "start:hot": "webpack-dev-server --inline --hot",
+    "watch": "webpack --watch",
+    "release:major": "npm version major && npm publish && git push --follow-tags",
+    "release:minor": "npm version minor && npm publish && git push --follow-tags",
+    "release:patch": "npm version patch && npm publish && git push --follow-tags",
+    "predist": "npm run build && npm run docs",
+    "dist": "mkdirp dist && cd build && tar cvzf ../dist/domino_js.tar.gz *",
+    "predocker": "npm run build",
+    "docker": "docker build -t domino_js -f deploy/Dockerfile .",
+    "prepublish": "npm run build"
+  },
   "dependencies": {
+    "phovea_core": "github:phovea/phovea_core#develop",
+    "phovea_vis": "github:phovea/phovea_vis#develop",
+    "phovea_ui": "github:phovea/phovea_ui#develop",
+    "@types/d3": "3.5.36",
+    "d3": "3.5.17",
+    "@types/bootstrap": "^3.3.32",
+    "bootstrap-sass": "^3.3.7",
+    "@types/jquery": "2.0.33",
+    "jquery": "3.1.1"
   },
-  "peerDependencies": {
-    "caleydo_core": "*",
-    "caleydo_vis": "*"
-  },
-  "caleydo": {
-    "type": "app",
-    "plugins": {
-      "web": {
-        "type": "app",
-        "name": "Domino.js"
-      }
-    },
-    "dependencies": {
-      "web": {
-        "d3": "~3.5.5",
-        "bootstrap": "~3.3.4"
-      }
-    },
-    "requirejs-config": {
-      "paths": {
-        "bootstrap": "${baseUrl}/bootstrap/dist/js/bootstrap"
-      },
-      "shim": {
-        "bootstrap": [
-          "jquery",
-          "css!${baseUrl}/bootstrap/dist/css/bootstrap"
-        ]
-      }
-    }
-  },
-  "publishConfig": {
-    "registry": "http://registry.caleydo.org/"
+  "devDependencies": {
+    "@types/jasmine": "2.5.40",
+    "awesome-typescript-loader": "3.0.0-beta.18",
+    "css-loader": "0.26.1",
+    "extract-text-webpack-plugin": "2.0.0-beta.5",
+    "extract-loader": "0.1.0",
+    "file-loader": "0.9.0",
+    "html-loader": "0.4.4",
+    "imports-loader": "0.7.0",
+    "jasmine": "2.5.3",
+    "json-loader": "0.5.4",
+    "karma": "1.4.0",
+    "karma-chrome-launcher": "2.0.0",
+    "karma-firefox-launcher": "1.0.0",
+    "karma-jasmine": "1.1.0",
+    "karma-junit-reporter": "2.0.0",
+    "karma-sourcemap-loader": "0.3.7",
+    "karma-webpack": "2.0.1",
+    "mkdirp": "0.5.1",
+    "node-sass": "4.3.0",
+    "null-loader": "0.1.1",
+    "raw-loader": "0.5.1",
+    "sass-loader": "4.1.1",
+    "style-loader": "0.13.1",
+    "tslint": "4.3.1",
+    "typedoc": "0.5.5",
+    "typescript": "2.1.5",
+    "url-loader": "0.5.7",
+    "webpack": "2.1.0-beta.28",
+    "webpack-dev-server": "2.1.0-beta.12"
   }
 }

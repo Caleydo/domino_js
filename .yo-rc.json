@@ -1,0 +1,46 @@
+{
+  "generator-phovea": {
+    "type": "app",
+    "name": "domino_js",
+    "author": "The Caleydo Team",
+    "githubAccount": "caleydo",
+    "modules": [
+      "phovea_core",
+      "phovea_vis"
+    ],
+    "extensions": [
+      {
+        "type": "app",
+        "id": "domino_js",
+        "module": "",
+        "extras": {
+          "name": "Domino.js"
+        }
+      }
+    ],
+    "sextensions": [],
+    "libraries": [
+      "d3",
+      "jquery"
+    ],
+    "unknown": {
+      "requirements": [],
+      "debianPackages": [],
+      "redhatPackages": []
+    },
+    "app": "",
+    "entries": {
+      "app": "./src/index.ts"
+    },
+    "libraryAliases": {
+      "d3": "d3/d3"
+    },
+    "libraryExternals": [
+      "d3",
+      "jquery"
+    ],
+    "ignores": [],
+    "today": "Wed, 09 Nov 2016 11:15:21 GMT",
+    "clientOnly": false
+  }
+}

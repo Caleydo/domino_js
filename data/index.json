@@ -2,99 +2,142 @@
   {
     "name": "Artists",
     "path": "number_one_artist.csv",
-    "separator" : "\t",
-    "size": [12, 13],
+    "separator": "\t",
+    "size": [
+      12,
+      13
+    ],
     "type": "table",
     "idtype": "artist",
     "columns": [
       {
         "name": "artist",
-        "value" : {
+        "value": {
           "type": "string"
         }
       },
       {
         "name": "origin",
-        "value" : {
+        "value": {
           "type": "categorical",
-          "categories" : ["Barbados","Ireland", "Sweden", "UK", "US"]
+          "categories": [
+            "Barbados",
+            "Ireland",
+            "Sweden",
+            "UK",
+            "US"
+          ]
         }
       },
       {
         "name": "career status",
-        "value" : {
+        "value": {
           "type": "categorical",
-          "categories" : ["active","inactive"]
+          "categories": [
+            "active",
+            "inactive"
+          ]
         }
       },
       {
         "name": "gender",
-        "value" : {
+        "value": {
           "type": "categorical",
-          "categories" : ["female","group","male"]
+          "categories": [
+            "female",
+            "group",
+            "male"
+          ]
         }
       },
       {
         "name": "first album (year)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [1930, 2014]
+          "range": [
+            1930,
+            2014
+          ]
         }
       },
       {
         "name": "studio albums (count)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [0, 33]
+          "range": [
+            0,
+            33
+          ]
         }
       },
       {
         "name": "year of birth",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [1930, 2014]
+          "range": [
+            1930,
+            2014
+          ]
         }
       },
       {
         "name": "age (years)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [0, 67]
+          "range": [
+            0,
+            67
+          ]
         }
       },
       {
         "name": "age at first album (years)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [0, 25]
+          "range": [
+            0,
+            25
+          ]
         }
       },
       {
         "name": "start of career (year)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [1930, 2014]
+          "range": [
+            1930,
+            2014
+          ]
         }
       },
       {
         "name": "end of career (year)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [1930, 2014]
+          "range": [
+            1930,
+            2014
+          ]
         }
       },
       {
         "name": "in business",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [0, 50]
+          "range": [
+            0,
+            50
+          ]
         }
       },
       {
         "name": "in business at first album (years)",
-        "value" : {
+        "value": {
           "type": "int",
-          "range" : [0, 8]
+          "range": [
+            0,
+            8
+          ]
         }
       }
     ]
@@ -103,7 +146,10 @@
     "name": "Countries",
     "path": "number_one_country.csv",
     "separator": "\t",
-    "size": [12, 8],
+    "size": [
+      12,
+      8
+    ],
     "type": "table",
     "idtype": "country",
     "columns": [
@@ -115,53 +161,94 @@
       },
       {
         "name": "continent",
-        "value" : {
+        "value": {
           "type": "categorical",
-          "categories" : ["Australia","Europe", "North America"]
+          "categories": [
+            "Australia",
+            "Europe",
+            "North America"
+          ]
         }
       },
       {
         "name": "sold singles (absolute)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [0, 6.8]
+          "range": [
+            0,
+            6.8
+          ]
         }
       },
       {
         "name": "sold albums (absolute)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [4.9, 225.8]
+          "range": [
+            4.9,
+            225.8
+          ]
         }
       },
       {
         "name": "retailvalue ($)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [77.9, 3635.2]
+          "range": [
+            77.9,
+            3635.2
+          ]
         }
       },
       {
         "name": "population (million)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [4.4, 310.2]
+          "range": [
+            4.4,
+            310.2
+          ]
         }
       },
       {
         "name": "sold singles (relative)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [0, 0.08262455]
+          "range": [
+            0,
+            0.08262455
+          ]
         }
       },
       {
         "name": "sold albums (relative)",
-        "value" : {
+        "value": {
           "type": "real",
-          "range" : [0.22435898, 1.6019262]
+          "range": [
+            0.22435898,
+            1.6019262
+          ]
         }
       }
     ]
+  },
+  {
+    "name": "Number One Hits",
+    "type": "matrix",
+    "path": "number_one.csv",
+    "separator": "\t",
+    "size": [
+      12,
+      12
+    ],
+    "coltype": "country",
+    "rowtype": "artist",
+    "value": {
+      "type": "int",
+      "range": [
+        0,
+        23
+      ]
+    }
   }
 ]

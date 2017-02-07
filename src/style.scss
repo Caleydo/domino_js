@@ -12,10 +12,6 @@ body, html {
 }
 
 h1 {
-  background-image: url(assets/icons/icon.svg);
-  background-position: left center;
-  background-size: contain;
-  background-repeat: no-repeat;
   padding-left: 1.1em;
 }
 
@@ -30,6 +26,7 @@ h1 {
       display: none;
     }
   }
+
 
   #toolbar {
     i {
@@ -48,7 +45,7 @@ $hover-color: #ffc46b;
 
 #content {
   display: inline-block;
-  width: 87.5%;
+  width: 100%;
   height: 100%;
 }
 
@@ -62,6 +59,11 @@ svg {
 }
 
 #board {
+  background-image: url(./assets/icons/icon.svg);
+  background-position: left top;
+  background-size: 10%;
+  background-repeat: no-repeat;
+
   width: 100%;
   height: 69%;
   position: relative;
@@ -77,28 +79,64 @@ svg {
     border: 1px solid #d58512;
   }
 
-  .block {
+  .blockContainer {
     position: absolute;
     width: auto;
     height: auto;
 
-    &.caleydo-select-selected {
-      border: 1px solid $select-color;
-      background: none;
-    }
-    &.caleydo-select-hovered {
-      border: 1px solid $hover-color;
-      background: none;
+    .block {
+      &.phovea-select-selected {
+        border: none;
+        background: none;
+      }
+      &.phovea-select-hovered {
+        border: none;
+        background: none;
+      }
+
+      .mode-block {
+        pointer-events: none;
+      }
+      &.ui-state-disabled {
+        opacity: 1;
+      }
     }
 
-    .mode-block {
-      pointer-events: none;
-    }
+    .toolbar {
+      display:block;
+      height: 22px;
+      width: auto;
+      padding-top: 3px;
+      border: 1px solid black;
+      border-radius: 3px;
 
-    &.ui-state-disabled {
-      opacity: 1;
+      &.phovea-select-selected {
+        border: 1px solid $select-color;
+        background: none;
+      }
+      &.phovea-select-hovered {
+        border: 1px solid $hover-color;
+        background: none;
+      }
+
+      i {
+        display:block;
+        width: 20px;
+        height: 20px;
+        //margin-left: 2px;
+        float: left;
+        text-align: center;
+        font-weight: bold;
+        cursor: pointer;
+
+        &.fa-arrows {
+
+          cursor: move;
+        }
+      }
     }
   }
+
 
   .selection-clearer {
     width: 100%;
@@ -121,10 +159,10 @@ svg {
         stroke-width: 1;
         stroke-opacity: 0.9;
 
-        &.caleydo-select-selected {
+        &.phovea-select-selected {
           stroke: $select-color;
         }
-        &.caleydo-select-hovered {
+        &.phovea-select-hovered {
           stroke: $hover-color;
         }
       }
@@ -136,10 +174,10 @@ svg {
         fill: black;
         opacity: 0.2;
 
-        &.caleydo-select-selected {
+        &.phovea-select-selected {
           fill: $select-color;
         }
-        &.caleydo-select-hovered {
+        &.phovea-select-hovered {
           fill: $hover-color;
         }
       }
@@ -187,9 +225,10 @@ svg {
 }
 
 #blockbrowser {
-  width: 100%;
+  width: 80%;
   height: 30%;
   display: block;
+  margin: 0 auto;
   overflow: auto;
 
   table {
@@ -208,13 +247,13 @@ svg {
   }
 }
 
-.caleydo-select-selected {
+.phovea-select-selected {
   //html variant
   border: 1px solid $select-color;
   background-color: $select-color;
 }
 
-svg .caleydo-select-selected {
+svg .phovea-select-selected {
   //svg variant
   stroke: $select-color;
   stroke-width: 1px;
