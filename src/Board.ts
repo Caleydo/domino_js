@@ -173,7 +173,7 @@ export class Board {
     }
   }
 
-  public digestKeyCode(e:KeyboardEvent) {
+  digestKeyCode(e:KeyboardEvent) {
     e.preventDefault(); // prevent the default action (scroll / move caret)
     const dxy:[number,number] = [0,0];
 
