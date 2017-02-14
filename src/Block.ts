@@ -322,6 +322,12 @@ export class Block extends EventHandler {
     this.node.style.height = val[1]+'px';
   }
 
+  get bounds() {
+    const pos = this.pos;
+    const size = this.size;
+    return rect(pos[0], pos[1], size[0], size[1]);
+  }
+
   private createHeader($header: d3.Selection<any>) {
     $header.append('i').attr('class', 'fa fa-arrows').on('mousedown', () => {
       const e = <MouseEvent> d3event;

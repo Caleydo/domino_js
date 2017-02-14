@@ -6,6 +6,7 @@ import {LinkContainer} from 'phovea_d3/src/link';
 import {Block, createBlockAt, IDominoDataType} from './Block';
 import {hasDnDType} from 'phovea_core/src';
 import {get as getData} from 'phovea_core/src/data';
+import {polygon, rect, vec2} from 'phovea_core/src/geom';
 
 export class Board {
   private content: HTMLElement;
@@ -127,29 +128,29 @@ export class Board {
     }
   }
 
+  private toBandArea(a: Block, b: Block) {
+    //swap
+    if (a.pos[0] > b.pos[0]) {
+      [b, a] = [a,b];
+    }
+    const ab = a.bounds;
+    const bb = b.bounds;
+
+    return polygon(ab.corner('ne'), bb.corner('nw'), bb.corner('sw'), ab.corner('se'));
+  }
+
   private checkBlockCollisions(a: Block, b: Block) {
-    let hasCollision = false;
+    const area = this.toBandArea(a, b);
 
-    this.blocks.manager.forEach((block) => {
-      if (hasCollision) {
-        return;
+    const collision = this.blocks.manager.entries.some((block) => {
+      if (block.id === a.id || block.id === b.id) {
+        return false;
       }
 
-      if (block.id !== a.id && block.id !== b.id) {
-        let leftelempos = b.node.offsetLeft;
-        let rightelempos = a.node.offsetLeft;
-        if (a.node.offsetLeft < b.node.offsetLeft) {
-          leftelempos = a.node.offsetLeft;
-          rightelempos = b.node.offsetLeft;
-        }
-
-        if (leftelempos < block.node.offsetLeft && block.node.offsetLeft < rightelempos) {
-          hasCollision = true;
-        }
-      }
-
+      const bounds = block.bounds;
+      return area.intersects(bounds).intersects;
     });
-    return !hasCollision;
+    return !collision;
   }
 
   digestKeyCode(e: KeyboardEvent) {
