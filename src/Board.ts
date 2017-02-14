@@ -29,18 +29,20 @@ export class Board {
       manager: new ObjectManager<Block>('block', 'Block')
     };
 
-    this.blocks.manager.on('select', function (event, type) {
+    this.blocks.manager.on('select', function (event, type: string) {
       that.blocks.manager.forEach(function (block) {
         block.node.classList.remove('phovea-select-' + type);
       });
       that.blocks.manager.selectedObjects(type).forEach(function (block) {
-        block.node.classList.add('phovea-select-' + type);
+        if (block.node) {
+          block.node.classList.add('phovea-select-' + type);
+        }
       });
     });
-    this.blocks.manager.on('add', function (event, id, block) {
+    this.blocks.manager.on('add', function (event, id, block: Block) {
       that.links.push(block);
     });
-    this.blocks.manager.on('remove', function (event, id, block) {
+    this.blocks.manager.on('remove', function (event, id, block: Block) {
       that.links.remove(block);
     });
 

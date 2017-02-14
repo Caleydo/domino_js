@@ -65,7 +65,7 @@ export class Block extends EventHandler {
 
   //private rotationAngle:number = 0;
 
-  constructor(private readonly data: IDominoDataType, parent: Element, private readonly board: Board, private readonly manager: ObjectManager<Block>) {
+  constructor(public readonly data: IDominoDataType, parent: Element, private readonly board: Board, private readonly manager: ObjectManager<Block>) {
     super();
     this.dragData = {
       startOffset: [0, 0],
@@ -82,6 +82,7 @@ export class Block extends EventHandler {
       </div>`;
     const $container = select(this.container);
     this.createHeader($container.select('div.toolbar'));
+
     this.node = <HTMLElement>this.container.querySelector('div.block');
     const that = this;
     this.rangeUnsorted = undefined;
@@ -170,6 +171,11 @@ export class Block extends EventHandler {
       initialVis
     });
     this.visMeta = this.vis.asMetaData;
+
+    const toolbar = <HTMLElement>this.container.querySelector('div.visses');
+    toolbar.innerHTML = '';
+    this.vis.addIconVisChooser(toolbar);
+
     this.zoom = new ZoomBehavior(this.node, this.vis, this.visMeta);
     this.propagate(this.zoom, 'zoom');
     this.fire('change.range', value, bak);
@@ -340,6 +346,8 @@ export class Block extends EventHandler {
       const amount = -1;
       this.zoom.zoom(amount, amount);
     });
+
+    $header.append('div').attr('class','visses');
 
     //addIconVisChooser(<Element>this.$header.node());
     $header.append('i').attr('class', 'fa fa-close').on('click', () => {
