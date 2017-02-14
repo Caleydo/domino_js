@@ -34,7 +34,7 @@ export class Board {
         block.node.classList.remove('phovea-select-' + type);
       });
       that.blocks.manager.selectedObjects(type).forEach(function (block) {
-        if (block.node) {
+        if (block && block.node) {
           block.node.classList.add('phovea-select-' + type);
         }
       });

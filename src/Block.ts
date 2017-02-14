@@ -173,7 +173,7 @@ export class Block extends EventHandler {
     this.visMeta = this.vis.asMetaData;
 
     const toolbar = <HTMLElement>this.container.querySelector('div.visses');
-    toolbar.innerHTML = '';
+    toolbar.innerHTML = `<i class="fa fa-image"></i>`;
     this.vis.addIconVisChooser(toolbar);
 
     this.zoom = new ZoomBehavior(this.node, this.vis, this.visMeta);
@@ -217,9 +217,7 @@ export class Block extends EventHandler {
     return vis.locate.apply(vis, Array.from(arguments)).then((r) => {
       const p = that.pos;
       if (Array.isArray(r)) {
-        return r.map(function (loc) {
-          return loc ? wrap(loc).shift(p) : loc;
-        });
+        return r.map((loc) => loc ? wrap(loc).shift(p) : loc);
       }
       return r ? wrap(r).shift(p) : r;
     });

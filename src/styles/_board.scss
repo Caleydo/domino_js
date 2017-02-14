@@ -49,21 +49,42 @@
     }
 
     .toolbar {
-      display:block;
+      display: none;
       height: 22px;
-      width: auto;
+      position: absolute;
+      top: -22px;
+      min-width: 7em;
       padding-top: 3px;
       border: 1px solid black;
       border-radius: 3px;
 
+      div.visses {
+        display: inline-block;
+        position: relative;
+        width: 1.2em;
+        > div {
+          background-color: white;
+          border: 1px solid black;
+          border-radius: 0 0 3px 3px;
+          display: none;
+          top: 17px;
+          width: 100%;
+          align-items: center;
+          flex-direction: column;
+          position: absolute;
+
+          > i {
+            display: block !important;
+          }
+        }
+        &:hover div {
+          display: flex;
+        }
+      }
+
       i {
-        display:block;
-        width: 20px;
-        height: 20px;
-        //margin-left: 2px;
-        float: left;
+        margin: 0 0.1em;
         text-align: center;
-        font-weight: bold;
         cursor: pointer;
 
         &:hover {
@@ -74,9 +95,21 @@
           cursor: move;
         }
       }
+      > i {
+        display: inline-block;
+
+        &:last-of-type {
+          margin-left: 1em;
+        }
+      }
+    }
+
+    &:hover {
+      .toolbar {
+        display: block;
+      }
     }
   }
-
 
   .selection-clearer {
     width: 100%;
