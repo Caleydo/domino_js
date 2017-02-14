@@ -1,6 +1,4 @@
-
-
-
+@import "colors";
 
 #board {
   width: 100%;
@@ -8,13 +6,13 @@
   position: relative;
 
   &.mode-block {
-    border: 1px solid #2e6da4;
+    border: 2px solid #2e6da4;
   }
   &.mode-select {
-    border: 1px solid #4cae4c;
+    border: 2px solid #4cae4c;
   }
   &.mode-band {
-    border: 1px solid #d58512;
+    border: 2px solid #d58512;
   }
 
   .blockContainer {
@@ -26,10 +24,20 @@
       &.phovea-select-selected {
         border: none;
         background: none;
+
+        .toolbar {
+          border: 1px solid $select-color;
+          background: none;
+        }
       }
       &.phovea-select-hovered {
         border: none;
         background: none;
+
+        .toolbar {
+          border: 1px solid $hover-color;
+          background: none;
+        }
       }
 
       .mode-block {
@@ -48,15 +56,6 @@
       border: 1px solid black;
       border-radius: 3px;
 
-      &.phovea-select-selected {
-        border: 1px solid $select-color;
-        background: none;
-      }
-      &.phovea-select-hovered {
-        border: 1px solid $hover-color;
-        background: none;
-      }
-
       i {
         display:block;
         width: 20px;
@@ -67,8 +66,11 @@
         font-weight: bold;
         cursor: pointer;
 
-        &.fa-arrows {
+        &:hover {
+          color: $hover-color;
+        }
 
+        &.fa-arrows {
           cursor: move;
         }
       }
