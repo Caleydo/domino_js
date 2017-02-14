@@ -21,19 +21,17 @@
     height: auto;
 
     .block {
-      &.phovea-select-selected {
-        border: none;
-        background: none;
+      border: 1px solid transparent;
 
+      &.phovea-select-selected {
+        background: none;
         .toolbar {
           border: 1px solid $select-color;
           background: none;
         }
       }
       &.phovea-select-hovered {
-        border: none;
         background: none;
-
         .toolbar {
           border: 1px solid $hover-color;
           background: none;
@@ -107,6 +105,10 @@
     &:hover {
       .toolbar {
         display: block;
+      }
+
+      .block {
+        border-color: $hover-color;
       }
     }
   }
