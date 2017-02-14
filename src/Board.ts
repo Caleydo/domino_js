@@ -20,7 +20,7 @@ export class Board {
   constructor(node: HTMLElement) {
     const that = this;
     this.content = node;
-    this.links = new LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom'], {
+    this.links = new LinkContainer(node, ['change', 'transform', 'change.pos', 'change.range', 'zoom', 'change.vis'], {
         filter: this.checkBlockCollisions.bind(this)
       });
 

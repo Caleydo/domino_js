@@ -170,6 +170,7 @@ export class Block extends EventHandler {
     this.vis = createMultiForm(this.data.view(this._range), content, {
       initialVis
     });
+    this.vis.on('changed', () => this.fire('change.vis', this.vis.act));
     this.visMeta = this.vis.asMetaData;
 
     const toolbar = <HTMLElement>this.container.querySelector('div.visses');
