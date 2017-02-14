@@ -21,11 +21,26 @@
         "value": {
           "type": "categorical",
           "categories": [
-            "Barbados",
-            "Ireland",
-            "Sweden",
-            "UK",
-            "US"
+            {
+              "name": "Barbados",
+              "color": "#a6cee3"
+            },
+            {
+              "name": "Ireland",
+              "color": "#1f78b4"
+            },
+            {
+              "name": "Sweden",
+              "color": "#b2df8a"
+            },
+            {
+              "name": "UK",
+              "color": "#33a02c"
+            },
+            {
+              "name": "US",
+              "color": "#fb9a99"
+            }
           ]
         }
       },
@@ -34,8 +49,14 @@
         "value": {
           "type": "categorical",
           "categories": [
-            "active",
-            "inactive"
+            {
+              "name": "active",
+              "color": "#b3e2cd"
+            },
+            {
+              "name": "inactive",
+              "color": "#fdcdac"
+            }
           ]
         }
       },
@@ -44,9 +65,18 @@
         "value": {
           "type": "categorical",
           "categories": [
-            "female",
-            "group",
-            "male"
+            {
+              "name": "female",
+              "color": "red"
+            },
+            {
+              "name": "group",
+              "color": "#ff00ff"
+            },
+            {
+              "name": "male",
+              "color": "blue"
+            }
           ]
         }
       },
@@ -164,9 +194,18 @@
         "value": {
           "type": "categorical",
           "categories": [
-            "Australia",
-            "Europe",
-            "North America"
+            {
+              "name": "Australia",
+              "color": "#1b9e77"
+            },
+            {
+              "name": "Europe",
+              "color": "#d95f02"
+            },
+            {
+              "name": "North America",
+              "color": "#7570b3"
+            }
           ]
         }
       },
