@@ -24,10 +24,12 @@ class Domino {
 
 
   async execute() {
+    this.header.wait();
     const items = await list();
     const listItems = convertToBlockbrowserItems(items);
     this.browser.addItems(listItems);
     this.browser.render();
+    this.header.ready();
   }
 }
 
