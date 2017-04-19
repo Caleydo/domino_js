@@ -150,7 +150,7 @@ export class Block extends EventHandler {
     }
     this.container.remove();
     this.manager.remove(this);
-  };
+  }
 
   setRangeImpl(value?: Range) {
     const bak = this._range;
@@ -238,7 +238,7 @@ export class Block extends EventHandler {
       }
       return r ? wrap(r).shift(p) : r;
     });
-  };
+  }
 
   sort(dim: number, cmp: string) {
     if (dim > this.ndim) {
