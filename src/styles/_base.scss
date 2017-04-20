@@ -1,0 +1,40 @@
+@import "colors";
+
+body, html {
+  font-family: Yantramanav, 'Helvetica Neue', Helvetica, sans-serif;
+  font-weight: 400;
+}
+
+th, label, strong, b, .label {
+  font-weight: 500 !important;
+}
+
+*[draggable] {
+  cursor: move;
+}
+
+svg {
+  vector-effect: non-scaling-stroke;
+  shape-rendering: geometricPrecision;
+}
+
+.phovea-select-selected {
+  //html variant
+  border: 1px solid $select-color;
+  background-color: $select-color;
+}
+
+svg .phovea-select-selected {
+  //svg variant
+  stroke: $select-color;
+  stroke-width: 1px;
+  fill: $select-color;
+  vector-effect: non-scaling-stroke;
+}
+
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}

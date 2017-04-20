@@ -2,50 +2,34 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import {AView} from 'phovea_core/src/layout_view';
-import {Rect} from 'phovea_core/src/geom';
 import {list} from 'phovea_core/src/data';
 import {Board} from './Board';
 import {Blockbrowser, convertToBlockbrowserItems} from './Blockbrowser';
+import {create as createHeader, AppHeader, AppHeaderLink} from 'phovea_ui/src/header';
 
 
-class Domino extends AView {
+class Domino {
   private readonly board: Board;
   private readonly browser: Blockbrowser;
-  private bounds = new Rect(0, 0, 0, 0);
+  private readonly header: AppHeader;
 
   constructor() {
-    super();
-
+    this.header = createHeader(document.body, {
+      appLink: new AppHeaderLink('Domino')
+    });
     this.board = new Board(document.getElementById('board'));
-    //this.info = selectionInfo.create(document.getElementById('selectioninfo'));
     this.browser = new Blockbrowser(document.getElementById('blockbrowser'));
-
     document.addEventListener('keydown', this.board.digestKeyCode.bind(this.board));
   }
 
-  getBounds() {
-    return this.bounds;
-  }
 
-  setBounds(x: number, y: number, w: number, h: number) {
-    this.bounds = new Rect(x, y, w, h);
-  }
-
-  get data() {
-    return [];
-  };
-
-  get idtypes() {
-    return [];
-  }
-
-  public execute(): void {
-    list().then((items) => {
-      const listItems = convertToBlockbrowserItems(items);
-      this.browser.addItems(listItems);
-      this.browser.render();
-    });
+  async execute() {
+    this.header.wait();
+    const items = await list();
+    const listItems = convertToBlockbrowserItems(items);
+    this.browser.addItems(listItems);
+    this.browser.render();
+    this.header.ready();
   }
 }
 

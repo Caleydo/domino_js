@@ -9,8 +9,8 @@ import 'file-loader?name=robots.txt!./robots.txt';
 import 'phovea_ui/src/_font-awesome';
 import 'phovea_ui/src/_bootstrap';
 import './style.scss';
-
 import {create} from './Domino';
+
 
 const dominoApplication = create();
 dominoApplication.execute();

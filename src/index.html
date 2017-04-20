@@ -8,29 +8,20 @@
     <meta name="viewport" content="width=device-width">
     <link href="//fonts.googleapis.com/css?family=Yantramanav:500,400,300" rel="stylesheet" type="text/css">
     <link href="./style.css" rel="stylesheet" type="text/css">
-    <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
-  </head>
-	<body>
-    <!--aside id="sidebar">
-      <h1>Domino</h1>
-      <div id="selectioninfo"></div>
-    </aside--->
-    <!--div id="sidebar">
-      <h1>Domino</h1>
-    </div-->
-    <div id="content">
-      <main id="board" class="mode-block">
-      </main>
-      <footer id="blockbrowser">
-      </footer>
-    </div>
+    <script src="//cdn.polyfill.io/v2/polyfill.min.js"></script>
+</head>
+<body>
+<main id="board" class="mode-block">
+</main>
+<footer id="blockbrowser">
+</footer>
 <script>
-  (function() {
-    var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
-    if (!isChrome) {
-      alert('This application was designed to be used in Google Chrome.\nRunning the application in other browsers might result in performance issues or other misbehavior.');
-    }
-  })();
+    (function () {
+        var isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+        if (!isChrome) {
+            alert('This application was designed to be used in Google Chrome.\nRunning the application in other browsers might result in performance issues or other misbehavior.');
+        }
+    })();
 </script>
 <script src="./common.js"></script>
 <script src="./app.js"></script>

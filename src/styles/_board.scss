@@ -1,0 +1,200 @@
+@import "colors";
+
+#board {
+  width: 100%;
+  flex: 1 1 auto;
+  position: relative;
+
+  &.mode-block {
+    border: 2px solid #2e6da4;
+  }
+  &.mode-select {
+    border: 2px solid #4cae4c;
+  }
+  &.mode-band {
+    border: 2px solid #d58512;
+  }
+
+  .blockContainer {
+    position: absolute;
+    width: auto;
+    height: auto;
+
+    .block {
+      border: 1px solid transparent;
+
+      &.phovea-select-selected {
+        background: none;
+        .toolbar {
+          border: 1px solid $select-color;
+          background: none;
+        }
+      }
+      &.phovea-select-hovered {
+        background: none;
+        .toolbar {
+          border: 1px solid $hover-color;
+          background: none;
+        }
+      }
+
+      .mode-block {
+        pointer-events: none;
+      }
+      &.ui-state-disabled {
+        opacity: 1;
+      }
+    }
+
+    .toolbar {
+      display: none;
+      height: 22px;
+      position: absolute;
+      top: -22px;
+      min-width: 7em;
+      padding-top: 3px;
+      border: 1px solid black;
+      border-radius: 3px;
+
+      div.visses {
+        display: inline-block;
+        position: relative;
+        width: 1.2em;
+        > div {
+          background-color: white;
+          border: 1px solid black;
+          border-radius: 0 0 3px 3px;
+          display: none;
+          top: 17px;
+          width: 100%;
+          align-items: center;
+          flex-direction: column;
+          position: absolute;
+
+          > i {
+            display: block !important;
+          }
+        }
+        &:hover div {
+          display: flex;
+        }
+      }
+
+      i {
+        margin: 0 0.1em;
+        text-align: center;
+        cursor: pointer;
+
+        &:hover {
+          color: $hover-color;
+        }
+
+        &.fa-arrows {
+          cursor: move;
+        }
+      }
+      > i {
+        display: inline-block;
+
+        &:last-of-type {
+          margin-left: 1em;
+        }
+      }
+    }
+
+    &:hover {
+      .toolbar {
+        display: block;
+      }
+
+      .block {
+        border-color: $hover-color;
+      }
+    }
+  }
+
+  .selection-clearer {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+  }
+
+  .link-container {
+    svg {
+      position: absolute;
+
+      path.rel-back {
+        stroke: none;
+        fill: white;
+        opacity: 0;
+      }
+      path.rel-item {
+        pointer-events: none;
+        stroke: black;
+        stroke-width: 1;
+        stroke-opacity: 0.9;
+
+        &.phovea-select-selected {
+          stroke: $select-color;
+        }
+        &.phovea-select-hovered {
+          stroke: $hover-color;
+        }
+      }
+      path.rel-group, path.rel-block {
+        pointer-events: none;
+        stroke: black;
+        stroke-width: 1;
+        stroke-opacity: 0.9;
+        fill: black;
+        opacity: 0.2;
+
+        &.phovea-select-selected {
+          fill: $select-color;
+        }
+        &.phovea-select-hovered {
+          fill: $hover-color;
+        }
+      }
+
+    }
+  }
+
+  .placeholder {
+    z-index: 100;
+    position: absolute;
+    border-radius: 10px;
+    background-color: #e2e2e2;
+
+    font-size: 300%;
+    text-align: center;
+
+    border: 2px outset gray;
+    padding: 0.1em;
+
+    width: auto;
+    min-width: 1em;
+    height: auto;
+    min-height: 3em;
+
+    > div {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+    }
+
+    .over {
+      border-color: black;
+    }
+
+    i {
+      display: block;
+      background-size: 100%;
+      background-position: center;
+      background-color: #d6d6d6;
+      padding: 0 0.1em;
+      border-radius: 10px;
+      border: 2px outset gray;
+    }
+  }
+}

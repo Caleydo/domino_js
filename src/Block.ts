@@ -2,19 +2,22 @@
  * Created by Tobias Appl on 7/29/2016.
  */
 
-import * as $ from 'jquery';
 import {select, ascending, descending, event as d3event} from 'd3';
-import {create as createMultiForm} from 'phovea_core/src/multiform';
+import {create as createMultiForm, MultiForm} from 'phovea_core/src/multiform';
+import {IVisMetaData, IVisPluginDesc} from 'phovea_core/src/vis';
 import {ZoomBehavior} from 'phovea_core/src/behavior';
 import {EventHandler} from 'phovea_core/src/event';
 import {Board} from './Board';
 import {list as rlist, all, Range} from 'phovea_core/src/range';
 import {wrap, rect} from 'phovea_core/src/geom';
-import {IObjectDecorator, BlockDecorator, IDecorableObject} from './BlockDecorator';
 import {ObjectManager, hoverSelectionType, SelectOperation, toSelectOperation} from 'phovea_core/src/idtype';
 import {VALUE_TYPE_CATEGORICAL, IDataDescription, ICategoricalValueTypeDesc} from 'phovea_core/src/datatype';
-import {IVectorDataDescription} from 'phovea_core/src/vector';
-import {IMatrixDataDescription} from 'phovea_core/src/matrix';
+import {IVectorDataDescription, IAnyVector} from 'phovea_core/src/vector';
+import {IMatrixDataDescription, IAnyMatrix} from 'phovea_core/src/matrix';
+
+export declare type BlockManager = ObjectManager<Block>;
+export declare type IDominoDataTypeDescription = IVectorDataDescription<any>|IMatrixDataDescription<any>;
+export declare type IDominoDataType = IAnyVector|IAnyMatrix;
 
 /**
  * Creates a block at position (x,y)
@@ -24,7 +27,7 @@ import {IMatrixDataDescription} from 'phovea_core/src/matrix';
  * @param pos
  * @returns {Block}
  */
-export function createBlockAt(data, parent: Element, board: Board, pos: [number, number], manager) {
+export function createBlockAt(data: IDominoDataType, parent: Element, board: Board, pos: [number, number], manager: BlockManager) {
   const block = createBlock(data, parent, board, manager);
   block.pos = pos;
   return block;
@@ -38,26 +41,22 @@ export function createBlockAt(data, parent: Element, board: Board, pos: [number,
  * @param pos
  * @returns {Block}
  */
-export function createBlock(data, parent: Element, board: Board, manager) {
-  return new Block<BlockDecorator>(data, parent, board, new BlockDecorator(), manager);
+export function createBlock(data: IDominoDataType, parent: Element, board: Board, manager: BlockManager) {
+  return new Block(data, parent, board, manager);
 }
 
-export class Block<Decorator extends IObjectDecorator> extends EventHandler implements IDecorableObject {
-  $node: JQuery;
-  $container: JQuery;
-  id;
+export class Block extends EventHandler {
+  readonly node: HTMLElement;
+  readonly container: HTMLElement;
+  readonly id: number;
 
-  private _data;
-  private parent: Element;
-  private board: Board;
-  zoom: ZoomBehavior;
-  private $content;
+  private zoom: ZoomBehavior;
   private actSorting = [];
-  private rangeUnsorted;
+  private rangeUnsorted: Range;
 
-  private _range;
-  private vis;
-  private visMeta;
+  private _range: Range;
+  private vis: MultiForm;
+  private visMeta: IVisMetaData;
 
   private dragData: {
     startOffset: [number, number];
@@ -66,54 +65,46 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
   //private rotationAngle:number = 0;
 
-  constructor(data, parent: Element, board: Board, public readonly decorator: Decorator, private readonly manager: ObjectManager<Block<Decorator>>) {
+  constructor(public readonly data: IDominoDataType, parent: Element, private readonly board: Board, private readonly manager: ObjectManager<Block>) {
     super();
     this.dragData = {
       startOffset: [0, 0],
       currentlyDragged: false
     };
-    this.decorator.decoratedObject = this;
-    this._data = data;
-    this.parent = parent;
     this.board = board;
-    this.$container = $('<div>').appendTo(parent).addClass('blockContainer');
-    this.decorator.decorateHeader(this.$container);
-    this.$node = $('<div>').appendTo(this.$container).addClass('block');
+    this.container = parent.ownerDocument.createElement('div');
+    this.container.classList.add('blockContainer');
+    parent.appendChild(this.container);
+    this.container.innerHTML = `
+      <div class="toolbar"></div>
+      <div class="block">
+        <div class="content mode-block"></div>
+      </div>`;
+    const $container = select(this.container);
+    this.createHeader($container.select('div.toolbar'));
 
-    select(this.$node[0]).datum(data); //magic variable within d3
-    this.$content = $('<div>').appendTo(this.$node);
+    this.node = <HTMLElement>this.container.querySelector('div.block');
     const that = this;
     this.rangeUnsorted = undefined;
     if (data.desc.type === 'vector') {
-      data.groups().then((groups) => {
+      (<IAnyVector>data).groups().then((groups) => {
         this.range = rlist(groups);
       });
     } else {
       this.range = all();
     }
 
-    this.$container.on({
-      mouseenter: () => {
-        manager.select(hoverSelectionType, [that.id], SelectOperation.ADD);
-      },
-      mouseleave: () => {
-        manager.select(hoverSelectionType, [that.id], SelectOperation.REMOVE);
-      },
-      click: (event) => {
+    $container.on('mouseenter', () => manager.select(hoverSelectionType, [that.id], SelectOperation.ADD))
+      .on('mouseleave', () => manager.select(hoverSelectionType, [that.id], SelectOperation.REMOVE))
+      .on('click', () => {
         console.log('select', that.id);
-        manager.select([that.id], toSelectOperation(event));
-        return false;
-      },
-      mousemove: (event) => {
-        this.mouseMove(event);
-      },
-      mouseup: () => {
-        this.mouseUp();
-      }
-    });
+        manager.select([that.id], toSelectOperation(<MouseEvent>d3event));
+        (<MouseEvent>d3event).preventDefault();
+      })
+      .on('mousemove', () => this.mouseMove(<MouseEvent>d3event))
+      .on('mouseup', () => this.mouseUp());
 
     this.actSorting = [];
-    this.$content.addClass('mode-block');
 
     this.id = this.manager.nextId(this);
   }
@@ -134,7 +125,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     }
   }
 
-  public set dragging(isDragging: boolean) {
+  set dragging(isDragging: boolean) {
     if (isDragging) {
       const e = <DragEvent> d3event;
       this.dragData.startOffset = [e.offsetX, e.offsetY];
@@ -142,81 +133,84 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     this.dragData.currentlyDragged = isDragging;
   }
 
-  public get dragOffset(): [number, number] | boolean {
+  get dragOffset(): [number, number] | boolean {
     if (this.dragData.currentlyDragged) {
       return this.dragData.startOffset;
     }
     return false;
   }
 
-  public rotateBy(degree: number): void {
+  rotateBy(degree: number): void {
     // TODO
   }
 
-  public destroy() {
+  destroy() {
     if (this.vis) {
       this.vis.destroy();
     }
-    this.$container.remove();
+    this.container.remove();
     this.manager.remove(this);
   };
 
-  public get data() {
-    return this._data;
-  }
-
-  public setRangeImpl(value: Range) {
+  setRangeImpl(value?: Range) {
     const bak = this._range;
     this._range = value || all();
-    let initialVis = guessInitial(this._data.desc);
+    let initialVis : number|string|IVisPluginDesc = guessInitial(this.data.desc);
+    const content = <HTMLElement>this.node.querySelector('div.content');
     if (this.vis) {
-      initialVis = this.vis.actDesc;
+      initialVis = this.vis.act;
       this.vis.destroy();
-      this.$content.empty();
+      content.innerHTML = '';
     }
     /*this.vis = multiform.createGrid(this.data, this.range_, this.$content[0], function (data, range) {
      return data.view(range);
      }, {
      initialVis : initialVis
      });*/
-    this.vis = createMultiForm(this._data.view(this._range), this.$content[0], {
+    this.vis = createMultiForm(this.data.view(this._range), content, {
       initialVis
     });
+    this.vis.on('changed', () => this.fire('change.vis', this.vis.act));
     this.visMeta = this.vis.asMetaData;
-    this.zoom = new ZoomBehavior(this.$node[0], this.vis, this.visMeta);
+
+    const toolbar = <HTMLElement>this.container.querySelector('div.visses');
+    toolbar.innerHTML = `<i class="fa fa-image"></i>`;
+    this.vis.addIconVisChooser(toolbar);
+
+    this.zoom = new ZoomBehavior(this.node, this.vis, this.visMeta);
     this.propagate(this.zoom, 'zoom');
     this.fire('change.range', value, bak);
   }
 
-  public get range() {
+  get range() {
     return this._range;
   }
 
-  public set range(value: Range) {
+  set range(value: Range|null) {
     this._range = value || all();
     this.rangeUnsorted = value;
     this.setRangeImpl(value);
   }
 
-  public get ndim() {
+  get ndim() {
     return this._range.ndim;
   }
 
-  public dim() {
+  dim() {
     return this._range.dim;
   }
 
-  public ids() {
-    return this._data.ids(this.range);
+  ids() {
+    return this.data.ids(this.range);
   }
 
-  public get location() {
+  get location() {
     const p = this.pos;
     const s = this.size;
     return rect(p[0], p[1], s[0], s[1]);
   }
 
-  public locate() {
+  locate() {
     const vis = this.vis, that = this;
     if (!vis || typeof vis.locate !== 'function') {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
@@ -224,15 +218,13 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     return vis.locate.apply(vis, Array.from(arguments)).then((r) => {
       const p = that.pos;
       if (Array.isArray(r)) {
-        return r.map(function (loc) {
-          return loc ? wrap(loc).shift(p) : loc;
-        });
+        return r.map((loc) => loc ? wrap(loc).shift(p) : loc);
       }
       return r ? wrap(r).shift(p) : r;
     });
   }
 
-  public locateById() {
+  locateById() {
     const vis = this.vis, that = this;
     if (!vis || typeof vis.locateById !== 'function') {
       return Promise.resolve((arguments.length === 1 ? undefined : new Array(arguments.length)));
@@ -248,7 +240,7 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     });
   };
 
-  public sort(dim: number, cmp: string) {
+  sort(dim: number, cmp: string) {
     if (dim > this.ndim) {
       return Promise.resolve(null);
     }
@@ -278,11 +270,11 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
 
     this.actSorting[dim] = cmp;
 
-    const cmpF = toCompareFunc(this._data.desc, <'desc'|'asc'>cmp);
+    const cmpF = toCompareFunc(this.data.desc, <'desc'|'asc'>cmp);
 
     //get data and sort the range and update the range
     //TODO just the needed data
-    return this._data._data().then((loadedData)=> {
+    return this.data.data().then((loadedData)=> {
       r[dim] = active.sort((a, b) => {
         return cmpF(a, b, loadedData);
       });
@@ -292,20 +284,19 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     });
   }
 
-  public get idtypes() {
-    return this._data.idtypes;
+  get idtypes() {
+    return this.data.idtypes;
   }
 
-  public get pos(): [number, number] {
-    const p = this.$container.position();
-    return [p.left, p.top];
+  get pos(): [number, number] {
+    return [parseInt(this.container.style.left, 10), parseInt(this.container.style.top, 10)];
   }
 
-  public set pos(value: [number, number]) {
-    const bak = this.$node.position();
-    this.$container.css('left', value[0] + 'px');
-    this.$container.css('top', value[1] + 'px');
-    this.fire('change.pos', value, [bak.left, bak.top]);
+  set pos(value: [number, number]) {
+    const bak = this.pos;
+    this.container.style.left = value[0] + 'px';
+    this.container.style.top = value[1] + 'px';
+    this.fire('change.pos', value, bak);
   }
 
   public moveBy(xdelta: number, ydelta: number) {
@@ -321,18 +312,57 @@ export class Block<Decorator extends IObjectDecorator> extends EventHandler impl
     return this.moveBy(toDelta(xfactor), toDelta(yfactor));
   }
 
-  public get size() {
-    return [this.$node.width(), this.$node.height()];
+  get size() {
+    const bb = this.node.getBoundingClientRect();
+    return [bb.width, bb.height];
   }
 
-  public set size(val) {
-    this.$node.css('width', val[0]);
-    this.$node.css('width', val[1]);
+  set size(val: [number, number]) {
+    this.node.style.width = val[0]+'px';
+    this.node.style.height = val[1]+'px';
+  }
+
+  get bounds() {
+    const pos = this.pos;
+    const size = this.size;
+    return rect(pos[0], pos[1], size[0], size[1]);
+  }
+
+  private createHeader($header: d3.Selection<any>) {
+    $header.append('i').attr('class', 'fa fa-arrows').on('mousedown', () => {
+      const e = <MouseEvent> d3event;
+      e.preventDefault();
+      this.dragging = true;
+    }).on('mouseup', () => {
+      const e = <MouseEvent> d3event;
+      e.preventDefault();
+      this.dragging = false;
+    });
+    $header.append('i').attr('class', 'fa fa-plus-square').on('click', () => {
+      const e = <MouseEvent> d3event;
+      e.preventDefault();
+      const amount = 1;
+      this.zoom.zoom(amount, amount);
+    });
+
+    $header.append('i').attr('class', 'fa fa-minus-square').on('click', () => {
+      const e = <MouseEvent> d3event;
+      e.preventDefault();
+      const amount = -1;
+      this.zoom.zoom(amount, amount);
+    });
+
+    $header.append('div').attr('class','visses');
+
+    //addIconVisChooser(<Element>this.$header.node());
+    $header.append('i').attr('class', 'fa fa-close').on('click', () => {
+      this.destroy();
+    });
   }
 }
 
 
-function guessInitial(desc: IDataDescription): string|number {
+function guessInitial(desc: IDominoDataTypeDescription): string|number {
   if (desc.type === 'matrix') {
     return 'phovea-vis-heatmap';
   }
@@ -345,7 +375,7 @@ function guessInitial(desc: IDataDescription): string|number {
   return -1;
 }
 
-function toCompareFunc(desc: IVectorDataDescription<any>|IMatrixDataDescription<any>, cmp: 'asc'|'desc'|((a: any, b: any)=>number)) {
+function toCompareFunc(desc: IDominoDataTypeDescription, cmp: 'asc'|'desc'|((a: any, b: any)=>number)) {
   const cmpF:(a: any, b: any)=>number = (cmp === 'asc') ? ascending : (cmp === 'desc' ? descending : cmp);
 
   switch (desc.value.type) {

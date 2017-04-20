@@ -39,13 +39,13 @@ export class Blockbrowser {
     this.items.push(item);
   }
 
-  public addItems(items: BlockbrowserItem[]) {
+  addItems(items: BlockbrowserItem[]) {
     items.forEach((item) => {
       this.addItem(item);
     });
   }
 
-  public render() {
+  render() {
     const data = this.$content.selectAll('tr').data(this.items);
     const dataenter = data.enter().append('tr');
     dataenter.each(function (ditem: BlockbrowserItem) {
@@ -68,11 +68,11 @@ export class BlockbrowserItem {
     this.item = item;
   }
 
-  public buildItemElement(itemNode: HTMLElement) {
+  buildItemElement(itemNode: HTMLElement) {
     itemNode.innerHTML = `<td>${this.name}</td><td>${this.type}</td><td>${this.idTypes.join(', ')}</td><td>${this.dimensions}</td>`;
   }
 
-  public onDragStart() {
+  onDragStart() {
     const e = <DragEvent> d3event;
     e.dataTransfer.effectAllowed = 'copy'; //none, copy, copyLink, copyMove, link, linkMove, move, all
     e.dataTransfer.setData('text/plain', this.item.desc.name);
